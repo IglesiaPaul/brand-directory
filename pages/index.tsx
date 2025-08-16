@@ -91,20 +91,58 @@ export default function Home() {
         <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {filtered.map((b) => (
             <li key={b.id} className="card">
-              <div className="flex items-start justify-between">
-                <h2 className="font-medium">{b.brand_name}</h2>
-                {b.category && (
-                  <span className="rounded-md px-2 py-0.5 text-xs border border-neutral-300">
-                    {b.category}
-                  </span>
-                )}
-              </div>
-              <p className="mt-2 text-sm text-neutral-700 line-clamp-3">{b.bio}</p>
-              <div className="mt-3 flex gap-2">
-                <Link href={`/brand/${b.slug}`} className="btn btn-primary">View</Link>
-                {b.website && <a href={b.website} target="_blank" className="btn">Website</a>}
-              </div>
-            </li>
+  <div className="flex items-start justify-between">
+    <h2 className="font-medium">{b.brand_name}</h2>
+    {b.category && (
+      <span className="rounded-md px-2 py-0.5 text-xs border border-neutral-300">
+        {b.category}
+      </span>
+    )}
+  </div>
+
+  <p className="mt-2 text-sm text-neutral-700 line-clamp-3">{b.bio}</p>
+
+  {/* Certifications row */}
+  <div className="mt-3 flex items-center gap-3">
+    {/* Organic */}
+    <span className={`inline-flex items-center gap-1 text-xs ${b.cert_organic ? 'text-green-700' : 'text-neutral-300'}`}>
+      <span className={`p-1 rounded-full border ${b.cert_organic ? 'border-green-300 bg-green-50' : 'border-neutral-200 bg-neutral-50'}`}>
+        <LeafIcon />
+      </span>
+      Organic
+    </span>
+
+    {/* Fair Trade */}
+    <span className={`inline-flex items-center gap-1 text-xs ${b.cert_fairtrade ? 'text-amber-800' : 'text-neutral-300'}`}>
+      <span className={`p-1 rounded-full border ${b.cert_fairtrade ? 'border-amber-300 bg-amber-50' : 'border-neutral-200 bg-neutral-50'}`}>
+        <HandHeartIcon />
+      </span>
+      Fair&nbsp;Trade
+    </span>
+
+    {/* FSC */}
+    <span className={`inline-flex items-center gap-1 text-xs ${b.cert_fsc ? 'text-teal-800' : 'text-neutral-300'}`}>
+      <span className={`p-1 rounded-full border ${b.cert_fsc ? 'border-teal-300 bg-teal-50' : 'border-neutral-200 bg-neutral-50'}`}>
+        <TreeIcon />
+      </span>
+      FSC
+    </span>
+
+    {/* Climate Neutral */}
+    <span className={`inline-flex items-center gap-1 text-xs ${b.cert_climateneutral ? 'text-blue-800' : 'text-neutral-300'}`}>
+      <span className={`p-1 rounded-full border ${b.cert_climateneutral ? 'border-blue-300 bg-blue-50' : 'border-neutral-200 bg-neutral-50'}`}>
+        <SparkIcon />
+      </span>
+      Climate
+    </span>
+  </div>
+
+  <div className="mt-3 flex gap-2">
+    <Link href={`/brand/${b.slug}`} className="btn btn-primary">View</Link>
+    {b.website && <a href={b.website} target="_blank" className="btn">Website</a>}
+  </div>
+</li>
+
           ))}
         </ul>
       )}
