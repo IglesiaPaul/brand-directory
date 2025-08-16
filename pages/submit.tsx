@@ -2,6 +2,8 @@ import { useState } from "react";
 import { supabase } from "../lib/supabaseClient";
 import Layout from "../components/Layout";
 
+const CATEGORIES = ["Apparel", "Materials", "Wellness", "Food", "Home", "Construction", "Packaging", "Other"];
+
 export default function Submit() {
   const [form, setForm] = useState({
     brand_name: "",
@@ -9,10 +11,11 @@ export default function Submit() {
     website: "",
     bio: "",
     primary_hex: "#111111",
-    secondary_hex: "#f3f4f6"
+    secondary_hex: "#f3f4f6",
+    category: ""
   });
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
@@ -47,6 +50,13 @@ export default function Submit() {
           <div>
             <label className="label">Short bio</label>
             <textarea className="textarea" name="bio" rows={4} placeholder="What you do…" onChange={handleChange}></textarea>
+          </div>
+          <div>
+            <label className="label">Category</label>
+            <select name="category" className="input" onChange={handleChange} defaultValue="">
+              <option value="" disabled>Select a category</option>
+              {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
+            </select>
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
