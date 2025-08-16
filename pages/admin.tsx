@@ -20,11 +20,13 @@ export default function Admin() {
       bio: data.bio,
       primary_hex: data.primary_hex,
       secondary_hex: data.secondary_hex,
-      slug: data.slug
+      slug: data.slug,
+      category: data.category || null
     }]);
     await supabase.from("brand_submissions").delete().eq("id", id);
     setSubs(prev => prev.filter(s => s.id !== id));
   };
+
 
   return (
     <Layout>
