@@ -69,3 +69,4 @@ export default function Layout({ children }: { children: ReactNode }) {
     </div>
   );
 }
+
