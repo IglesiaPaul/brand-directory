@@ -1,0 +1,53 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Minimal, airy base */
+:root {
+  color-scheme: light;
+}
+html, body, #__next {
+  height: 100%;
+}
+body {
+  @apply bg-white text-neutral-900 font-sans antialiased;
+}
+
+/* Cards & buttons */
+.card {
+  @apply bg-white border border-neutral-200 rounded-xl p-4 shadow-sm;
+}
+.card:hover {
+  @apply shadow-md;
+}
+.btn {
+  @apply inline-flex items-center justify-center rounded-lg px-4 py-2 text-sm font-medium border border-neutral-300;
+}
+.btn-primary {
+  @apply bg-black text-white border-black;
+}
+.btn-ghost {
+  @apply border-transparent text-neutral-700;
+}
+
+/* Inputs */
+.input, .textarea {
+  @apply w-full rounded-lg border border-neutral-300 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-black focus:border-black;
+}
+.label {
+  @apply block text-sm mb-1 text-neutral-700;
+}
+
+/* Simple page shell spacing */
+.shell {
+  @apply min-h-screen flex flex-col;
+}
+.header {
+  @apply sticky top-0 z-10 bg-white/90 backdrop-blur border-b border-neutral-200;
+}
+.main {
+  @apply flex-1 container;
+}
+.footer {
+  @apply border-t border-neutral-200 py-6 text-center text-sm text-neutral-500;
+}
