@@ -2,6 +2,8 @@ import Link from "next/link";
 import { supabase } from "../lib/supabaseClient";
 import { useEffect, useMemo, useState } from "react";
 import Layout from "../components/Layout";
+import { LeafIcon, HandHeartIcon, TreeIcon, SparkIcon } from "../components/Icons";
+
 
 export default function Home() {
   const [brands, setBrands] = useState<any[]>([]);
