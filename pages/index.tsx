@@ -43,14 +43,29 @@ export default function Home() {
 
   return (
     <Layout>
-      {/* HERO */}
+      {/* HERO INTRO */}
+      <section className="mb-6">
+        <div className="card border-black/10 bg-neutral-50 text-center">
+          <div className="max-w-2xl mx-auto">
+            <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight">
+              Hemp Brand Directory
+            </h1>
+            <p className="mt-2 text-neutral-700">
+              Gathering brands built on a single powerful ingredient—hemp—with a common goal of
+              advancing the greater good for our planet and humanity.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* HERO CTA */}
       <section className="mb-6">
         <div className="card border-black/10 bg-neutral-50">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="max-w-2xl">
-              <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight">
-                Join the Hemp & Sustainable Brands Directory
-              </h1>
+              <h2 className="text-2xl sm:text-3xl font-semibold tracking-tight">
+                Join the Hemp Brand Directory
+              </h2>
               <p className="mt-2 text-neutral-700">
                 Be discovered by eco-conscious buyers, partners, and investors. Share your impact—
                 materials, certifications, and positive footprint—in a clean, trusted profile.
