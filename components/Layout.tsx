@@ -25,15 +25,13 @@ export default function Layout({ children }: { children: ReactNode }) {
       <header className="header">
         <div className="container h-14 flex items-center justify-between">
           <Link href="/" className="font-semibold tracking-tight">
-            Brand Directory
+            Hemp Brand Directory
           </Link>
 
           {/* Desktop nav */}
           <nav className="hidden md:flex items-center gap-1">
             <NavLink href="/" label="Directory" />
             <NavLink href="/submit" label="Submit" />
-            <NavLink href="/admin" label="Admin" />
-            <NavLink href="/print-catalog" label="Print" />
           </nav>
 
           {/* Mobile toggle */}
@@ -57,15 +55,21 @@ export default function Layout({ children }: { children: ReactNode }) {
             <nav className="container py-3 flex flex-col gap-2">
               <NavLink href="/" label="Directory" />
               <NavLink href="/submit" label="Submit" />
-              <NavLink href="/admin" label="Admin" />
-              <NavLink href="/print-catalog" label="Print" />
             </nav>
           </div>
         )}
       </header>
 
       <main className="main py-6">{children}</main>
-      <footer className="footer">© {new Date().getFullYear()} Hemp’in</footer>
+      <footer className="footer">
+        <div className="container py-4 flex flex-col sm:flex-row items-center justify-between gap-2">
+          <p>© {new Date().getFullYear()} Hemp’in</p>
+          <nav className="flex items-center gap-3">
+            <NavLink href="/admin" label="Admin" />
+            <NavLink href="/print-catalog" label="Print" />
+          </nav>
+        </div>
+      </footer>
     </div>
   );
 }
