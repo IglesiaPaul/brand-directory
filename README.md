@@ -1,11 +1,15 @@
-# Brand Directory (MVP)
+# Hemp Brand Directory (MVP)
 
 Minimal Next.js + Supabase starter (no styling).
+This directory unites hemp-based brands around a shared ingredient and purpose, promoting collaboration for the planet and humanity.
+
 
 ## Environment variables (create `.env.local` for local dev and set the same in Netlify)
 NEXT_PUBLIC_SUPABASE_URL=your-url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
 HCAPTCHA_SECRET=your-hcaptcha-secret  # optional; function included but not wired into the form yet
+ADMIN_USER=some-user
+ADMIN_PASSWORD=strong-password
 
 ## Supabase SQL (run in Supabase > SQL editor)
 -- Enable extensions (safe to run multiple times)
