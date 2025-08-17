@@ -23,9 +23,21 @@ create table if not exists brand_submissions (
   brand_name text,
   email text,
   website text,
+  category text,
   bio text,
   primary_hex text,
   secondary_hex text,
+  logo_url text,
+  contact_name text,
+  contact_phone text,
+  instagram text,
+  youtube text,
+  linkedin text,
+  line text,
+  whatsapp text,
+  tiktok text,
+  xiaohongshu text,
+  other_social text,
   slug text generated always as (lower(replace(coalesce(brand_name, ''), ' ', '-'))) stored
 );
 
