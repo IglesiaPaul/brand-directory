@@ -25,9 +25,7 @@ export default function Home() {
 
   const categories = useMemo(() => {
     const set = new Set<string>();
-    brands.forEach((b) => {
-      if (b.category) set.add(b.category);
-    });
+    brands.forEach((b) => b.category && set.add(b.category));
     return ["All", ...Array.from(set).sort((a, b) => a.localeCompare(b))];
   }, [brands]);
 
@@ -45,15 +43,35 @@ export default function Home() {
 
   return (
     <Layout>
-      <div className="mb-6 space-y-3">
+      {/* HERO */}
+      <section className="mb-6">
+        <div className="card border-black/10 bg-neutral-50">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="max-w-2xl">
+              <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight">
+                Join the Hemp & Sustainable Brands Directory
+              </h1>
+              <p className="mt-2 text-neutral-700">
+                Be discovered by eco-conscious buyers, partners, and investors. Share your impact—
+                materials, certifications, and positive footprint—in a clean, trusted profile.
+              </p>
+            </div>
+            <div className="shrink-0">
+              <Link href="/submit" className="btn btn-primary w-full sm:w-auto">
+                Submit Brand Info
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* CONTROLS */}
+      <section className="mb-6 space-y-3">
         <div className="flex items-end justify-between gap-3">
           <div>
-            <h1 className="text-xl font-semibold">Discover brands</h1>
-            <p className="text-sm text-neutral-600">Search, filter, and peek eco impact.</p>
+            <h2 className="text-lg font-semibold">Discover brands</h2>
+            <p className="text-sm text-neutral-600">Search, filter, and preview eco impact.</p>
           </div>
-          <Link href="/submit" className="btn btn-primary">
-            Submit
-          </Link>
         </div>
 
         {/* Search */}
@@ -63,9 +81,10 @@ export default function Home() {
             placeholder="Search brands…"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
+            aria-label="Search brands"
           />
           {search && (
-            <button className="btn" onClick={() => setSearch("")}>
+            <button className="btn" onClick={() => setSearch("")} aria-label="Clear search">
               Clear
             </button>
           )}
@@ -82,6 +101,7 @@ export default function Home() {
                 className={`px-3 py-1 rounded-full text-sm border ${
                   active ? "bg-black text-white border-black" : "border-neutral-300 hover:bg-neutral-100"
                 }`}
+                aria-pressed={active}
               >
                 {c}
               </button>
@@ -93,8 +113,9 @@ export default function Home() {
         <div className="text-sm text-neutral-600">
           Showing <strong>{filtered.length}</strong> of {brands.length}
         </div>
-      </div>
+      </section>
 
+      {/* GRID */}
       {filtered.length === 0 ? (
         <p className="text-neutral-600">No matching brands.</p>
       ) : (
@@ -107,7 +128,7 @@ export default function Home() {
                 {/* Header row */}
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
-                    <h2 className="font-medium truncate">{b.brand_name}</h2>
+                    <h3 className="font-medium truncate">{b.brand_name}</h3>
                     {b.category && (
                       <span className="mt-1 inline-block rounded-md px-2 py-0.5 text-xs border border-neutral-300">
                         {b.category}
@@ -115,7 +136,7 @@ export default function Home() {
                     )}
                   </div>
 
-                  {/* Chevron toggle (mobile/desktop) */}
+                  {/* Chevron toggle */}
                   <button
                     onClick={() => toggle(b.id)}
                     className="shrink-0 inline-flex items-center justify-center w-9 h-9 rounded-lg border border-neutral-300"
@@ -141,106 +162,91 @@ export default function Home() {
                 {/* Bio */}
                 {b.bio && <p className="mt-2 text-sm text-neutral-700 line-clamp-3">{b.bio}</p>}
 
-                {/* Certifications row with tooltips (desktop) */}
+                {/* Certifications with tooltips (desktop), grey by default */}
                 <div className="mt-3 flex items-center gap-3">
                   {/* Organic */}
-                  <Tooltip
-                    label={b.cert_organic ? "Organic inputs verified" : "Not certified"}
-                    disabled={!b.cert_organic}
-                  >
-                    <button
+                  <Tooltip label={b.cert_organic ? "Organic inputs verified" : "Not certified"} disabled={!b.cert_organic}>
+                    <span
                       className={`inline-flex items-center gap-1 text-xs ${
                         b.cert_organic ? "text-green-700" : "text-neutral-300"
                       }`}
-                      aria-label={b.cert_organic ? "Organic certified" : "Organic not certified"}
-                      type="button"
                     >
                       <span
                         className={`p-1 rounded-full border ${
                           b.cert_organic ? "border-green-300 bg-green-50" : "border-neutral-200 bg-neutral-50"
                         }`}
+                        aria-hidden="true"
                       >
                         <LeafIcon />
                       </span>
                       Organic
-                    </button>
+                    </span>
                   </Tooltip>
 
                   {/* Fair Trade */}
-                  <Tooltip
-                    label={b.cert_fairtrade ? "Fair Trade practices" : "Not certified"}
-                    disabled={!b.cert_fairtrade}
-                  >
-                    <button
+                  <Tooltip label={b.cert_fairtrade ? "Fair Trade practices" : "Not certified"} disabled={!b.cert_fairtrade}>
+                    <span
                       className={`inline-flex items-center gap-1 text-xs ${
                         b.cert_fairtrade ? "text-amber-800" : "text-neutral-300"
                       }`}
-                      aria-label={b.cert_fairtrade ? "Fair Trade certified" : "Fair Trade not certified"}
-                      type="button"
                     >
                       <span
                         className={`p-1 rounded-full border ${
                           b.cert_fairtrade ? "border-amber-300 bg-amber-50" : "border-neutral-200 bg-neutral-50"
                         }`}
+                        aria-hidden="true"
                       >
                         <HandHeartIcon />
                       </span>
                       Fair&nbsp;Trade
-                    </button>
+                    </span>
                   </Tooltip>
 
                   {/* FSC */}
                   <Tooltip label={b.cert_fsc ? "FSC chain-of-custody" : "Not certified"} disabled={!b.cert_fsc}>
-                    <button
+                    <span
                       className={`inline-flex items-center gap-1 text-xs ${
                         b.cert_fsc ? "text-teal-800" : "text-neutral-300"
                       }`}
-                      aria-label={b.cert_fsc ? "FSC certified" : "FSC not certified"}
-                      type="button"
                     >
                       <span
                         className={`p-1 rounded-full border ${
                           b.cert_fsc ? "border-teal-300 bg-teal-50" : "border-neutral-200 bg-neutral-50"
                         }`}
+                        aria-hidden="true"
                       >
                         <TreeIcon />
                       </span>
                       FSC
-                    </button>
+                    </span>
                   </Tooltip>
 
                   {/* Climate Neutral */}
-                  <Tooltip
-                    label={b.cert_climateneutral ? "Certified climate neutral" : "Not certified"}
-                    disabled={!b.cert_climateneutral}
-                  >
-                    <button
+                  <Tooltip label={b.cert_climateneutral ? "Certified climate neutral" : "Not certified"} disabled={!b.cert_climateneutral}>
+                    <span
                       className={`inline-flex items-center gap-1 text-xs ${
                         b.cert_climateneutral ? "text-blue-800" : "text-neutral-300"
                       }`}
-                      aria-label={b.cert_climateneutral ? "Climate Neutral certified" : "Climate Neutral not certified"}
-                      type="button"
                     >
                       <span
                         className={`p-1 rounded-full border ${
                           b.cert_climateneutral ? "border-blue-300 bg-blue-50" : "border-neutral-200 bg-neutral-50"
                         }`}
+                        aria-hidden="true"
                       >
                         <SparkIcon />
                       </span>
                       Climate
-                    </button>
+                    </span>
                   </Tooltip>
                 </div>
 
-                {/* Expanded "quick sheet" */}
+                {/* Expanded “quick sheet” */}
                 <div
                   id={ariaId}
                   role="region"
                   aria-label="Quick impact details"
-                  className={`overflow-hidden transition-all duration-300 ease-in-out ${
-                    isOpen ? "max-h-[520px] mt-4" : "max-h-0"
-                  }`}
+                  className={`overflow-hidden transition-all duration-300 ease-in-out ${isOpen ? "max-h-[520px] mt-4" : "max-h-0"}`}
                 >
                   {isOpen && (
                     <div className="pt-4 border-t border-neutral-200 space-y-4">
@@ -287,28 +293,18 @@ export default function Home() {
                       {/* Actions */}
                       <div className="flex gap-2">
                         <Link href={`/brand/${b.slug}`} className="btn btn-primary">
-                          View profile
+                          More details
                         </Link>
-                        {b.website && (
-                          <a href={b.website} target="_blank" className="btn">
-                            Website
-                          </a>
-                        )}
                       </div>
                     </div>
                   )}
                 </div>
 
-                {/* Bottom CTAs (always visible) */}
-                <div className="mt-3 flex gap-2">
+                {/* Bottom CTA (always visible) */}
+                <div className="mt-3">
                   <Link href={`/brand/${b.slug}`} className="btn btn-primary">
-                    View
+                    More details
                   </Link>
-                  {b.website && (
-                    <a href={b.website} target="_blank" className="btn">
-                      Website
-                    </a>
-                  )}
                 </div>
               </li>
             );
