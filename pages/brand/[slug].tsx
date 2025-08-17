@@ -3,15 +3,20 @@ import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import Layout from "../../components/Layout";
 import { CO2Icon, WaterIcon, RecycleIcon, CertIcon } from "../../components/Icons";
+import { pickAccessibleText } from "../../lib/color";
 
 export default function BrandPage() {
   const router = useRouter();
-  const { slug } = router.query;
+  const { slug } = router.query as { slug?: string };
   const [brand, setBrand] = useState<any>(null);
 
   useEffect(() => {
     if (!slug) return;
-    supabase.from("brands").select("*").eq("slug", slug).single()
+    supabase
+      .from("brands")
+      .select("*")
+      .eq("slug", slug)
+      .single()
       .then(({ data, error }) => {
         if (error) console.error(error);
         else setBrand(data);
@@ -20,55 +25,62 @@ export default function BrandPage() {
 
   if (!brand) return <Layout><div>Loading…</div></Layout>;
 
+  // Compute accessible text & optional scrim based on brand primary hex
+  const { textColor, scrim, bgFallback } = pickAccessibleText(brand.primary_hex);
+  const accent = brand.secondary_hex || "#f3f4f6";
+
   return (
     <Layout>
-      <article className="max-w-3xl mx-auto space-y-8">
-        {/* Header */}
-        <header>
-          <h1 className="text-3xl font-semibold">{brand.brand_name}</h1>
-          {brand.mission && (
-            <p className="mt-2 text-neutral-700">{brand.mission}</p>
-          )}
-          <div className="mt-3 flex flex-wrap gap-2">
-            {brand.website && (
-              <a className="btn btn-primary" href={brand.website} target="_blank">Visit website</a>
+      {/* Hero banner with brand primary color */}
+      <section className="mb-6 rounded-2xl overflow-hidden">
+        <div className="relative p-6 sm:p-8" style={{ background: bgFallback }}>
+          {scrim && <div className="absolute inset-0" style={{ background: scrim }} />}
+          <div className="relative">
+            <h1 className="text-3xl font-semibold" style={{ color: textColor }}>
+              {brand.brand_name}
+            </h1>
+            {brand.mission && (
+              <p className="mt-2 max-w-2xl text-sm sm:text-base" style={{ color: textColor }}>
+                {brand.mission}
+              </p>
             )}
+            <div className="mt-4 h-1.5 w-20 rounded-full" style={{ background: accent }} />
           </div>
-        </header>
+        </div>
+      </section>
 
-        {/* Impact badges */}
-        {/* Impact badges */}
-<section className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-  {brand.carbon_saving && (
-    <div className="card flex flex-col items-center text-center p-4 bg-green-50 border border-green-200">
-      <CO2Icon />
-      <span className="mt-2 text-sm font-medium text-green-700">CO₂</span>
-      <span className="text-xs text-green-600">{brand.carbon_saving}</span>
-    </div>
-  )}
-  {brand.water_saving && (
-    <div className="card flex flex-col items-center text-center p-4 bg-blue-50 border border-blue-200">
-      <WaterIcon />
-      <span className="mt-2 text-sm font-medium text-blue-700">Water</span>
-      <span className="text-xs text-blue-600">{brand.water_saving}</span>
-    </div>
-  )}
-  {brand.recyclability && (
-    <div className="card flex flex-col items-center text-center p-4 bg-teal-50 border border-teal-200">
-      <RecycleIcon />
-      <span className="mt-2 text-sm font-medium text-teal-700">Recyclability</span>
-      <span className="text-xs text-teal-600">{brand.recyclability}</span>
-    </div>
-  )}
-  {brand.certifications && (
-    <div className="card flex flex-col items-center text-center p-4 bg-yellow-50 border border-yellow-200">
-      <CertIcon />
-      <span className="mt-2 text-sm font-medium text-yellow-700">Certs</span>
-      <span className="text-xs text-yellow-600">{brand.certifications}</span>
-    </div>
-  )}
-</section>
-
+      {/* Impact badges */}
+      <article className="max-w-3xl mx-auto space-y-8">
+        <section className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          {brand.carbon_saving && (
+            <div className="card flex flex-col items-center text-center p-4 bg-green-50 border border-green-200">
+              <CO2Icon />
+              <span className="mt-2 text-sm font-medium text-green-700">CO₂</span>
+              <span className="text-xs text-green-600">{brand.carbon_saving}</span>
+            </div>
+          )}
+          {brand.water_saving && (
+            <div className="card flex flex-col items-center text-center p-4 bg-blue-50 border border-blue-200">
+              <WaterIcon />
+              <span className="mt-2 text-sm font-medium text-blue-700">Water</span>
+              <span className="text-xs text-blue-600">{brand.water_saving}</span>
+            </div>
+          )}
+          {brand.recyclability && (
+            <div className="card flex flex-col items-center text-center p-4 bg-teal-50 border border-teal-200">
+              <RecycleIcon />
+              <span className="mt-2 text-sm font-medium text-teal-700">Recyclability</span>
+              <span className="text-xs text-teal-600">{brand.recyclability}</span>
+            </div>
+          )}
+          {brand.certifications && (
+            <div className="card flex flex-col items-center text-center p-4 bg-yellow-50 border border-yellow-200">
+              <CertIcon />
+              <span className="mt-2 text-sm font-medium text-yellow-700">Certs</span>
+              <span className="text-xs text-yellow-600">{brand.certifications}</span>
+            </div>
+          )}
+        </section>
 
         {/* Sustainability Impact */}
         <section className="card">
@@ -114,4 +126,3 @@ export default function BrandPage() {
     </Layout>
   );
 }
-
