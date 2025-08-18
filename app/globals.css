@@ -1,10 +1,90 @@
 /* app/globals.css */
-html, body {
-  margin: 0;
-  padding: 0;
-  font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
-  background: #fff;
-  color: #111;
+
+/* Base */
+:root {
+  --bg: #0b0c0f;
+  --panel: #111317;
+  --panel-2: #14171d;
+  --border: #22262e;
+  --muted: #a7b0c0;
+  --text: #e6eaf2;
+  --accent: #3b82f6;
+  --accent-2: #22c55e;
+  --danger: #ef4444;
+  --warn: #f59e0b;
 }
 
 * { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+}
+
+/* Layout helpers */
+.container { max-width: 1200px; margin: 0 auto; padding: 24px; }
+
+/* Controls */
+.input, .select, .textarea {
+  background: #0e1014;
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 10px;
+  outline: none;
+}
+.input:focus, .select:focus, .textarea:focus { border-color: var(--accent); }
+
+.btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  border: 1px solid var(--border);
+  background: var(--panel);
+  color: var(--text);
+  padding: 8px 12px; border-radius: 8px; cursor: pointer;
+}
+.btn:hover { background: var(--panel-2); }
+.btn:disabled { opacity: .6; cursor: not-allowed; }
+.btn--primary { border-color: transparent; background: var(--accent); color: white; }
+.btn--danger { border-color: transparent; background: var(--danger); color: white; }
+
+/* Admin table */
+.table-wrap { overflow: auto; border: 1px solid var(--border); border-radius: 12px; background: var(--panel); }
+.table { width: 100%; border-collapse: collapse; font-size: 14px; }
+.table thead th {
+  position: sticky; top: 0; z-index: 1;
+  background: #0d1117; color: #cbd5e1; text-align: left; font-weight: 600;
+  padding: 10px; border-bottom: 1px solid var(--border);
+}
+.table tbody td { padding: 8px 10px; border-top: 1px solid var(--border); vertical-align: top; }
+.table tbody tr:nth-child(2n) td { background: #0e1218; }
+.actions { display: flex; gap: 8px; }
+
+/* Badges */
+.badge {
+  display: inline-block; padding: 2px 8px; border-radius: 999px;
+  font-size: 12px; line-height: 18px; border: 1px solid var(--border); background: #0d1117; color: #cbd5e1;
+}
+.badge--live { border-color: #1f6feb; color: #9ecbff; }
+.badge--demo { border-color: #f59e0b; color: #fcd34d; }
+.badge--draft { border-color: #6b7280; color: #d1d5db; }
+.badge--archived { border-color: #374151; color: #9ca3af; }
+
+/* Cards grid (public directory) */
+.grid { display: grid; gap: 16px; }
+@media (min-width: 640px) { .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (min-width: 1024px) { .grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+
+.card {
+  background: var(--panel); border: 1px solid var(--border); border-radius: 12px;
+  padding: 14px;
+}
+.card h3 { margin: 0 0 6px; font-size: 16px; }
+.card p { margin: 4px 0; color: var(--muted); }
+.card a { color: #93c5fd; text-decoration: none; }
+.card a:hover { text-decoration: underline; }
+
+/* Small utilities */
+.row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+.right { margin-left: auto; }
+.mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
