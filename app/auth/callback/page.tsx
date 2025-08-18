@@ -1,39 +1,35 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { useSearchParams, useRouter } from 'next/navigation';
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { supabaseBrowser } from '@/lib/supabaseBrowser';
 
 export default function AuthCallbackPage() {
-  const search = useSearchParams();
   const router = useRouter();
-  const [msg, setMsg] = useState('Signing you in…');
 
   useEffect(() => {
-    const run = async () => {
-      const code = search.get('code');
-      if (!code) {
-        setMsg('Missing code in URL. Try requesting a new magic link.');
-        router.replace('/login?error=missing_code');
-        return;
-      }
+    const handleAuth = async () => {
       const supabase = supabaseBrowser();
-      const { error } = await supabase.auth.exchangeCodeForSession(code);
+
+      // exchange the token in the URL for a session
+      const { error } = await supabase.auth.exchangeCodeForSession(window.location.href);
+
       if (error) {
-        setMsg(`Sign-in failed: ${error.message}`);
-        router.replace('/login?error=1');
-        return;
+        console.error('Auth error:', error.message);
+        router.push('/login?error=1');
+      } else {
+        // success: redirect to admin dashboard
+        router.push('/admin');
       }
-      router.replace('/admin');
     };
-    run();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+
+    handleAuth();
+  }, [router]);
 
   return (
-    <main style={{ padding: 24 }}>
-      <h1 style={{ fontSize: 20, fontWeight: 600 }}>Auth Callback</h1>
-      <p>{msg}</p>
+    <main className="p-6">
+      <h1 className="text-xl font-semibold">Authenticating...</h1>
+      <p>Please wait while we log you in.</p>
     </main>
   );
 }
