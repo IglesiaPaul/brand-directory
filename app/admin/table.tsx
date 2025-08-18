@@ -13,7 +13,6 @@ type Brand = {
   phone: string | null;
   slogan: string | null;
   description: string | null;
-  bio?: string | null;
   is_test?: boolean | null;
   status?: 'live' | 'demo' | 'draft' | 'archived' | null;
   created_at?: string | null;
@@ -26,16 +25,20 @@ export default function AdminTable({ rows }: { rows: Brand[] }) {
   const [savingId, setSavingId] = useState<string | null>(null);
   const [creating, setCreating] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [q, setQ] = useState('');
 
   const supabase = supabaseBrowser();
 
   const filtered = useMemo(() => {
+    const query = q.trim().toLowerCase();
     return data.filter((r) => {
       if (!showTests && r.is_test) return false;
       if (filterStatus !== 'all' && r.status !== filterStatus) return false;
-      return true;
+      if (!query) return true;
+      const hay = `${r.brand_name ?? ''} ${r.country ?? ''} ${r.industry ?? ''} ${r.website ?? ''}`.toLowerCase();
+      return hay.includes(query);
     });
-  }, [data, filterStatus, showTests]);
+  }, [data, filterStatus, showTests, q]);
 
   function update(id: string, field: keyof Brand, value: any) {
     setData((prev) => prev.map((r) => (r.id === id ? { ...r, [field]: value } : r)));
@@ -46,7 +49,6 @@ export default function AdminTable({ rows }: { rows: Brand[] }) {
     setErrorMsg(null);
     const { id, ...cols } = row;
 
-    // basic normalization: trim strings
     const cleanCols: any = {};
     for (const [k, v] of Object.entries(cols)) {
       cleanCols[k] = typeof v === 'string' ? v.trim() : v;
@@ -62,55 +64,32 @@ export default function AdminTable({ rows }: { rows: Brand[] }) {
     setErrorMsg(null);
     const { data: inserted, error } = await supabase
       .from('brands')
-      .insert([
-        {
-          brand_name: 'New Brand',
-          status: 'draft',
-          is_test: true,
-        },
-      ])
+      .insert([{ brand_name: 'New Brand', status: 'draft', is_test: true }])
       .select('*')
       .single();
 
     setCreating(false);
-    if (error) {
-      setErrorMsg(error.message);
-      return;
-    }
-    if (inserted) {
-      setData((prev) => [inserted as Brand, ...prev]);
-    }
+    if (error) { setErrorMsg(error.message); return; }
+    if (inserted) setData((prev) => [inserted as Brand, ...prev]);
   }
 
   async function remove(id: string) {
     if (!confirm('Delete this brand? This cannot be undone.')) return;
     const { error } = await supabase.from('brands').delete().eq('id', id);
-    if (error) {
-      setErrorMsg(error.message);
-      return;
-    }
+    if (error) { setErrorMsg(error.message); return; }
     setData((prev) => prev.filter((r) => r.id !== id));
   }
 
   return (
-    <main className="p-6 max-w-[1200px] mx-auto">
-      <div className="mb-4 flex items-center gap-3">
-        <button
-          onClick={createNew}
-          disabled={creating}
-          className="px-3 py-2 border rounded"
-          title="Create a new draft brand"
-        >
+    <div className="container">
+      <div className="row" style={{ marginBottom: 12 }}>
+        <button className="btn" onClick={createNew} disabled={creating}>
           {creating ? 'Creating…' : 'New Brand'}
         </button>
 
-        <label className="inline-flex items-center gap-2">
+        <label className="row">
           <span>Status:</span>
-          <select
-            value={filterStatus}
-            onChange={(e) => setFilterStatus(e.target.value as any)}
-            className="border p-1 rounded"
-          >
+          <select className="select" value={filterStatus} onChange={(e) => setFilterStatus(e.target.value as any)}>
             <option value="all">All</option>
             <option value="live">live</option>
             <option value="demo">demo</option>
@@ -119,153 +98,79 @@ export default function AdminTable({ rows }: { rows: Brand[] }) {
           </select>
         </label>
 
-        <label className="inline-flex items-center gap-2">
-          <input
-            type="checkbox"
-            checked={showTests}
-            onChange={(e) => setShowTests(e.target.checked)}
-          />
+        <label className="row">
+          <input type="checkbox" checked={showTests} onChange={(e) => setShowTests(e.target.checked)} />
           <span>Show test rows</span>
         </label>
 
-        {errorMsg && <span className="text-red-600 ml-auto">{errorMsg}</span>}
+        <input
+          className="input right"
+          placeholder="Search name, country, industry…"
+          value={q}
+          onChange={(e) => setQ(e.target.value)}
+          style={{ minWidth: 240 }}
+        />
       </div>
 
-      <div className="overflow-x-auto">
-        <table className="w-full text-sm border-collapse">
+      {errorMsg && <div style={{ color: 'var(--danger)', marginBottom: 10 }}>{errorMsg}</div>}
+
+      <div className="table-wrap">
+        <table className="table">
           <thead>
-            <tr className="text-left border-b">
-              <Th>Name</Th>
-              <Th>Website</Th>
-              <Th>Email</Th>
-              <Th>Country</Th>
-              <Th>Industry</Th>
-              <Th>Phone</Th>
-              <Th>Status</Th>
-              <Th>Test?</Th>
-              <Th>Slogan</Th>
-              <Th>Description</Th>
-              <Th>Actions</Th>
+            <tr>
+              <th>Name</th>
+              <th style={{ minWidth: 240 }}>Website</th>
+              <th style={{ minWidth: 220 }}>Email</th>
+              <th>Country</th>
+              <th>Industry</th>
+              <th>Phone</th>
+              <th>Status</th>
+              <th>Test?</th>
+              <th style={{ minWidth: 220 }}>Slogan</th>
+              <th style={{ minWidth: 300 }}>Description</th>
+              <th>Actions</th>
             </tr>
           </thead>
           <tbody>
             {filtered.map((r) => (
-              <tr key={r.id} className="border-t align-top">
-                <Td>
-                  <Input value={r.brand_name ?? ''} onChange={(v) => update(r.id, 'brand_name', v)} width="14rem" />
-                </Td>
-                <Td>
-                  <Input value={r.website ?? ''} onChange={(v) => update(r.id, 'website', v)} width="16rem" />
-                </Td>
-                <Td>
-                  <Input value={r.contact_email ?? ''} onChange={(v) => update(r.id, 'contact_email', v)} width="14rem" />
-                </Td>
-                <Td>
-                  <Input value={r.country ?? ''} onChange={(v) => update(r.id, 'country', v)} width="8rem" />
-                </Td>
-                <Td>
-                  <Input value={r.industry ?? ''} onChange={(v) => update(r.id, 'industry', v)} width="10rem" />
-                </Td>
-                <Td>
-                  <Input value={r.phone ?? ''} onChange={(v) => update(r.id, 'phone', v)} width="10rem" />
-                </Td>
-                <Td>
-                  <select
-                    className="border p-1 rounded"
-                    value={r.status ?? 'draft'}
-                    onChange={(e) => update(r.id, 'status', e.target.value as any)}
-                  >
+              <tr key={r.id}>
+                <td><input className="input" value={r.brand_name ?? ''} onChange={(e) => update(r.id, 'brand_name', e.target.value)} /></td>
+                <td><input className="input" value={r.website ?? ''} onChange={(e) => update(r.id, 'website', e.target.value)} /></td>
+                <td><input className="input" value={r.contact_email ?? ''} onChange={(e) => update(r.id, 'contact_email', e.target.value)} /></td>
+                <td><input className="input" value={r.country ?? ''} onChange={(e) => update(r.id, 'country', e.target.value)} /></td>
+                <td><input className="input" value={r.industry ?? ''} onChange={(e) => update(r.id, 'industry', e.target.value)} /></td>
+                <td><input className="input" value={r.phone ?? ''} onChange={(e) => update(r.id, 'phone', e.target.value)} /></td>
+                <td>
+                  <select className="select" value={r.status ?? 'draft'} onChange={(e) => update(r.id, 'status', e.target.value as any)}>
                     <option value="live">live</option>
                     <option value="demo">demo</option>
                     <option value="draft">draft</option>
                     <option value="archived">archived</option>
                   </select>
-                </Td>
-                <Td className="text-center">
-                  <input
-                    type="checkbox"
-                    checked={!!r.is_test}
-                    onChange={(e) => update(r.id, 'is_test', e.target.checked)}
-                  />
-                </Td>
-                <Td>
-                  <Input value={r.slogan ?? ''} onChange={(v) => update(r.id, 'slogan', v)} width="16rem" />
-                </Td>
-                <Td>
-                  <Textarea value={r.description ?? ''} onChange={(v) => update(r.id, 'description', v)} width="20rem" rows={3} />
-                </Td>
-                <Td>
-                  <div className="flex gap-2">
-                    <button
-                      className="px-2 py-1 border rounded"
-                      disabled={savingId === r.id}
-                      onClick={() => save(r)}
-                    >
+                </td>
+                <td style={{ textAlign: 'center' }}>
+                  <input type="checkbox" checked={!!r.is_test} onChange={(e) => update(r.id, 'is_test', e.target.checked)} />
+                </td>
+                <td><input className="input" value={r.slogan ?? ''} onChange={(e) => update(r.id, 'slogan', e.target.value)} /></td>
+                <td><textarea className="textarea" rows={3} value={r.description ?? ''} onChange={(e) => update(r.id, 'description', e.target.value)} /></td>
+                <td>
+                  <div className="actions">
+                    <button className="btn btn--primary" disabled={savingId === r.id} onClick={() => save(r)}>
                       {savingId === r.id ? 'Saving…' : 'Save'}
                     </button>
-                    <button className="px-2 py-1 border rounded" onClick={() => remove(r.id)}>
+                    <button className="btn btn--danger" onClick={() => remove(r.id)}>
                       Delete
                     </button>
                   </div>
-                </Td>
+                </td>
               </tr>
             ))}
             {filtered.length === 0 && (
-              <tr>
-                <td colSpan={11} className="p-4 opacity-70">
-                  No rows match the current filters.
-                </td>
-              </tr>
+              <tr><td colSpan={11} style={{ padding: 16, color: 'var(--muted)' }}>No rows match the current filters.</td></tr>
             )}
           </tbody>
         </table>
       </div>
-    </main>
-  );
-}
-
-function Th({ children }: { children: React.ReactNode }) {
-  return <th className="p-2 font-semibold">{children}</th>;
-}
-function Td({ children, className }: { children: React.ReactNode; className?: string }) {
-  return <td className={`p-2 ${className ?? ''}`}>{children}</td>;
-}
-function Input({
-  value,
-  onChange,
-  width,
-}: {
-  value: string;
-  onChange: (v: string) => void;
-  width?: string;
-}) {
-  return (
-    <input
-      className="border p-1 rounded"
-      style={{ width }}
-      value={value}
-      onChange={(e) => onChange(e.target.value)}
-    />
-  );
-}
-function Textarea({
-  value,
-  onChange,
-  width,
-  rows = 3,
-}: {
-  value: string;
-  onChange: (v: string) => void;
-  width?: string;
-  rows?: number;
-}) {
-  return (
-    <textarea
-      className="border p-1 rounded"
-      style={{ width }}
-      rows={rows}
-      value={value}
-      onChange={(e) => onChange(e.target.value)}
-    />
+    </div>
   );
 }
