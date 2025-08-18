@@ -17,7 +17,7 @@ export default async function AdminPage() {
 
   // 2) Optional: allowlist the editors by email (RLS still protects DB)
   const ALLOWLIST = [
-    'you@yourdomain.com',
+    'me@pauliglesia.com',
     // 'teammate@yourdomain.com'
   ];
   if (ALLOWLIST.length && !ALLOWLIST.includes(user.email ?? '')) {
