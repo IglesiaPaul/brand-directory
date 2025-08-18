@@ -88,3 +88,29 @@ body {
 .row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
 .right { margin-left: auto; }
 .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
+
+/* --- Additions for colored categories & icons --- */
+
+/* Category color badges */
+.badge--Fashion     { border-color:#7c3aed; color:#c4b5fd; }   /* purple */
+.badge--Materials   { border-color:#22c55e; color:#86efac; }   /* green */
+.badge--Accessories { border-color:#06b6d4; color:#67e8f9; }   /* cyan */
+.badge--Footwear    { border-color:#f59e0b; color:#fde68a; }   /* amber */
+.badge--Home        { border-color:#ef4444; color:#fecaca; }   /* red */
+.badge--Other       { border-color:#94a3b8; color:#e2e8f0; }   /* slate */
+
+/* Expandable card */
+.card .meta { display:flex; gap:8px; flex-wrap:wrap; margin:6px 0 2px; }
+.card .toggle { cursor:pointer; font-size:13px; color:#93c5fd; }
+.card .details { margin-top:8px; border-top:1px dashed var(--border); padding-top:8px; }
+
+/* Icon row */
+.icon-row { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+.icon {
+  display:inline-flex; align-items:center; justify-content:center;
+  width:26px; height:26px; border-radius:6px; background:#0d1117; border:1px solid var(--border);
+  font-size:14px;
+}
+.icon--ok    { border-color:#22c55e; }
+.icon--warn  { border-color:#f59e0b; }
+.icon--info  { border-color:#3b82f6; }
