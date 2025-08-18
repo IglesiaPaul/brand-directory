@@ -1,4 +1,4 @@
-# Hemp Brand Directory (MVP)
+# Hemp Brand Directory (MVP) yes
 
 Minimal Next.js + Supabase starter (no styling).
 This directory unites hemp-based brands around a shared ingredient and purpose, promoting collaboration for the planet and humanity.
