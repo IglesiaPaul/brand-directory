@@ -2,11 +2,7 @@
   "name": "brand-directory",
   "version": "0.2.0",
   "private": true,
-  "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start"
-  },
+  "scripts": { "dev": "next dev", "build": "next build", "start": "next start" },
   "dependencies": {
     "@supabase/ssr": "^0.4.0",
     "@supabase/supabase-js": "^2.45.0",
@@ -23,7 +19,5 @@
     "postcss": "^8.4.41",
     "autoprefixer": "^10.4.20"
   },
-  "engines": {
-    "node": ">=18.17.0"
-  }
+  "engines": { "node": ">=18.17.0" }
 }
