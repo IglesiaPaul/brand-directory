@@ -11,7 +11,6 @@ export default function AuthCallbackPage() {
 
   useEffect(() => {
     const go = async () => {
-      // Get the full URL and extract ?code=... safely
       const href = typeof window !== 'undefined' ? window.location.href : '';
       const code =
         typeof window !== 'undefined'
@@ -25,8 +24,6 @@ export default function AuthCallbackPage() {
       }
 
       const supabase = supabaseBrowser();
-
-      // exchangeCodeForSession accepts the full URL
       const { error } = await supabase.auth.exchangeCodeForSession(href);
 
       if (error) {
