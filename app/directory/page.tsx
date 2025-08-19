@@ -144,7 +144,7 @@ export default function PublicDirectoryPage() {
             return (
               <article key={b.id} className="card">
                 <h3 style={{ marginBottom: 4 }}>
-                  <a href={`/brand/${b.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+                  <a href={`/brand/${b.slug}`} style={{ textDecoration: 'none', color: 'inherit' }}>
                     {b.brand_name}
                   </a>
                 </h3>
