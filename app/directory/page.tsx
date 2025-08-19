@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { supabaseBrowser } from '@/lib/supabaseBrowser';
 
+/* --- Brand type --- */
 type Brand = {
   id: string;
   slug: string;
@@ -29,26 +30,26 @@ type Brand = {
 function countryToFlag(country?: string | null) {
   if (!country) return '';
   const map: Record<string, string> = {
-    "United States of America": "US",
-    "United States": "US",
-    "USA": "US",
-    "United Kingdom": "GB",
-    "UK": "GB",
-    "Great Britain": "GB",
-    "South Korea": "KR",
-    "Korea": "KR",
-    "Czech Republic": "CZ",
-    "Ivory Coast": "CI",
-    "Côte d'Ivoire": "CI",
-    "UAE": "AE",
-    "United Arab Emirates": "AE",
+    'United States of America': 'US',
+    'United States': 'US',
+    'USA': 'US',
+    'United Kingdom': 'GB',
+    'UK': 'GB',
+    'Great Britain': 'GB',
+    'South Korea': 'KR',
+    'Korea': 'KR',
+    'Czech Republic': 'CZ',
+    'Ivory Coast': 'CI',
+    "Côte d'Ivoire": 'CI',
+    'UAE': 'AE',
+    'United Arab Emirates': 'AE',
   };
   const name = country.trim();
   const iso = (map[name] || name).toUpperCase();
 
   if (/^[A-Z]{2}$/.test(iso)) {
-    const codePoints = iso.split('').map(c => 0x1F1E6 + (c.charCodeAt(0) - 65));
-    return String.fromCodePoint(...codePoints);
+    const cps = iso.split('').map((c) => 0x1f1e6 + (c.charCodeAt(0) - 65));
+    return String.fromCodePoint(...cps);
   }
   return country;
 }
@@ -58,35 +59,35 @@ function industryBadgeClass(industry?: string | null) {
   if (key.includes('fashion')) return 'badge badge--Fashion';
   if (key.includes('material')) return 'badge badge--Materials';
   if (key.includes('accessor')) return 'badge badge--Accessories';
-  if (key.includes('footwear') || key.includes('shoes')) return 'badge badge--Footwear';
+  if (key.includes('footwear') || key.includes('shoes'))
+    return 'badge badge--Footwear';
   if (key.includes('home')) return 'badge badge--Home';
   return 'badge badge--Other';
 }
 
+/* --- Page --- */
 export default function PublicDirectoryPage() {
   const [rows, setRows] = useState<Brand[]>([]);
   const [loading, setLoading] = useState(true);
   const [q, setQ] = useState('');
   const [country, setCountry] = useState('All');
   const [industry, setIndustry] = useState('All');
-  const [open, setOpen] = useState<Record<string, boolean>>({});
+  const [open, setOpen] = useState<Record<string, boolean>>({}); // expand per-card
 
   useEffect(() => {
     const fetchLive = async () => {
       const supabase = supabaseBrowser();
       const { data, error } = await supabase
         .from('brands')
-        .select('id,slug,brand_name,website,contact_email,country,industry,slogan,description,status,is_test,gots,bcorp,fair_trade,oeko_tex,vegan,climate_neutral')
+        .select(
+          'id,slug,brand_name,website,contact_email,country,industry,slogan,description,status,is_test,gots,bcorp,fair_trade,oeko_tex,vegan,climate_neutral'
+        )
         .eq('status', 'live')
         .eq('is_test', false)
         .order('brand_name', { ascending: true });
 
-      if (error) {
-        console.error(error.message);
-        setRows([]);
-      } else {
-        // Normalize nullable booleans so TypeScript is happy
-        const normalized = ((data ?? []) as Partial<Brand>[]).map((b) => ({
+      if (!error && data) {
+        const normalized = (data ?? []).map((b) => ({
           ...b,
           is_test: b.is_test ?? null,
           gots: b.gots ?? null,
@@ -104,31 +105,42 @@ export default function PublicDirectoryPage() {
   }, []);
 
   const countries = useMemo(() => {
-    const set = new Set(rows.map(r => r.country).filter(Boolean) as string[]);
+    const set = new Set(rows.map((r) => r.country).filter(Boolean) as string[]);
     return ['All', ...Array.from(set).sort()];
   }, [rows]);
 
   const industries = useMemo(() => {
-    const set = new Set(rows.map(r => r.industry).filter(Boolean) as string[]);
+    const set = new Set(rows.map((r) => r.industry).filter(Boolean) as string[]);
     return ['All', ...Array.from(set).sort()];
   }, [rows]);
 
   const filtered = useMemo(() => {
     const query = q.trim().toLowerCase();
-    return rows.filter(r => {
+    return rows.filter((r) => {
       if (country !== 'All' && r.country !== country) return false;
       if (industry !== 'All' && r.industry !== industry) return false;
       if (!query) return true;
-      const hay = `${r.brand_name ?? ''} ${r.country ?? ''} ${r.industry ?? ''} ${r.slogan ?? ''} ${r.description ?? ''}`.toLowerCase();
+      const hay = `${r.brand_name ?? ''} ${r.country ?? ''} ${
+        r.industry ?? ''
+      } ${r.slogan ?? ''} ${r.description ?? ''}`.toLowerCase();
       return hay.includes(query);
     });
   }, [rows, q, country, industry]);
 
   return (
     <div className="container">
-      <h1 style={{ fontSize: 28, fontWeight: 700, marginBottom: 8 }}>Hemp’in Directory</h1>
+      <h1 style={{ fontSize: 28, fontWeight: 700, marginBottom: 8 }}>
+        Hemp’in Directory
+      </h1>
       <p style={{ color: 'var(--muted)', marginTop: 0, marginBottom: 16 }}>
-        Discover hemp fashion & materials brands.
+        Discover hemp fashion & materials brands from around the world.
+      </p>
+
+      {/* --- Explanations for filters --- */}
+      <p style={{ fontSize: 14, color: 'var(--muted)', marginBottom: 8 }}>
+        Use the filters below to refine your search. Select a <b>Country</b> to
+        see brands based in a specific location, or choose an <b>Industry</b> to
+        focus on categories such as fashion, materials, or home.
       </p>
 
       <div className="row" style={{ marginBottom: 16 }}>
@@ -139,11 +151,27 @@ export default function PublicDirectoryPage() {
           value={q}
           onChange={(e) => setQ(e.target.value)}
         />
-        <select className="select" value={country} onChange={(e) => setCountry(e.target.value)}>
-          {countries.map(c => <option key={c} value={c}>{c}</option>)}
+        <select
+          className="select"
+          value={country}
+          onChange={(e) => setCountry(e.target.value)}
+        >
+          {countries.map((c) => (
+            <option key={c} value={c}>
+              {c}
+            </option>
+          ))}
         </select>
-        <select className="select" value={industry} onChange={(e) => setIndustry(e.target.value)}>
-          {industries.map(c => <option key={c} value={c}>{c}</option>)}
+        <select
+          className="select"
+          value={industry}
+          onChange={(e) => setIndustry(e.target.value)}
+        >
+          {industries.map((c) => (
+            <option key={c} value={c}>
+              {c}
+            </option>
+          ))}
         </select>
       </div>
 
@@ -157,36 +185,89 @@ export default function PublicDirectoryPage() {
             return (
               <article key={b.id} className="card">
                 <h3 style={{ marginBottom: 4 }}>
-                  <a href={`/brands/${b.slug}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+                  <a
+                    href={`/brands/${b.slug}`}
+                    style={{ textDecoration: 'none', color: 'inherit' }}
+                  >
                     {b.brand_name}
                   </a>
                 </h3>
 
                 <div className="meta">
-                  {b.industry && <span className={industryBadgeClass(b.industry)}>{b.industry}</span>}
-                  {b.country && <span className="badge">{flag ? `${flag} ${b.country}` : b.country}</span>}
+                  {b.industry && (
+                    <span className={industryBadgeClass(b.industry)}>
+                      {b.industry}
+                    </span>
+                  )}
+                  {b.country && (
+                    <span className="badge">
+                      {flag ? `${flag} ${b.country}` : b.country}
+                    </span>
+                  )}
                 </div>
 
                 {b.slogan && <p style={{ marginTop: 6 }}>{b.slogan}</p>}
 
-                <div className="toggle" onClick={() => setOpen(prev => ({ ...prev, [b.id]: !isOpen }))}>
+                {/* Toggle */}
+                <div
+                  className="toggle"
+                  onClick={() =>
+                    setOpen((prev) => ({ ...prev, [b.id]: !isOpen }))
+                  }
+                >
                   {isOpen ? 'Hide details ▲' : 'Show details ▼'}
                 </div>
 
                 {isOpen && (
                   <div className="details">
                     {b.description && <p>{b.description}</p>}
+
+                    {/* Certifications row */}
                     <div className="icon-row" style={{ marginTop: 6 }}>
-                      {b.gots && <span className="icon icon--ok" title="GOTS">🧵</span>}
-                      {b.bcorp && <span className="icon icon--info" title="B Corp">🅱️</span>}
-                      {b.fair_trade && <span className="icon icon--ok" title="Fair Trade">🤝</span>}
-                      {b.oeko_tex && <span className="icon icon--info" title="OEKO-TEX">✅</span>}
-                      {b.vegan && <span className="icon icon--warn" title="Vegan">🌱</span>}
-                      {b.climate_neutral && <span className="icon icon--info" title="Climate neutral">🌍</span>}
+                      {b.gots && (
+                        <span className="icon icon--ok" title="GOTS">
+                          🧵
+                        </span>
+                      )}
+                      {b.bcorp && (
+                        <span className="icon icon--info" title="B Corp">
+                          🅱️
+                        </span>
+                      )}
+                      {b.fair_trade && (
+                        <span className="icon icon--ok" title="Fair Trade">
+                          🤝
+                        </span>
+                      )}
+                      {b.oeko_tex && (
+                        <span className="icon icon--info" title="OEKO-TEX">
+                          ✅
+                        </span>
+                      )}
+                      {b.vegan && (
+                        <span className="icon icon--warn" title="Vegan">
+                          🌱
+                        </span>
+                      )}
+                      {b.climate_neutral && (
+                        <span
+                          className="icon icon--info"
+                          title="Climate neutral"
+                        >
+                          🌍
+                        </span>
+                      )}
                     </div>
+
+                    {/* Links */}
                     <div style={{ marginTop: 8 }}>
                       {b.website && (
-                        <a href={b.website} target="_blank" rel="noreferrer" className="mono">
+                        <a
+                          href={b.website}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="mono"
+                        >
                           {b.website}
                         </a>
                       )}
@@ -197,7 +278,9 @@ export default function PublicDirectoryPage() {
             );
           })}
           {filtered.length === 0 && (
-            <p style={{ color: 'var(--muted)' }}>No brands match your filters.</p>
+            <p style={{ color: 'var(--muted)' }}>
+              No brands match your filters.
+            </p>
           )}
         </div>
       )}
