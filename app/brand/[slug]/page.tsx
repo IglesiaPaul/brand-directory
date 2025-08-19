@@ -1,64 +1,28 @@
-import { supabaseServer } from '@/lib/supabaseServer';
+'use client';
 
-export default async function BrandPage({ params }: { params: { slug: string } }) {
-  const supabase = supabaseServer();
-  const { data: brand, error } = await supabase
-    .from('brands')
-    .select('*')
-    .eq('slug', params.slug)   // ✅ slug, not id
-    .single();
+import { useEffect, useState } from 'react';
+import { useParams } from 'next/navigation';
+import { supabaseBrowser } from '@/lib/supabaseBrowser';
 
-  if (error || !brand) {
-    return (
-      <main className="container">
-        <h1>Brand not found</h1>
-        <p>Go back to the <a className="btn" href="/directory">Directory</a>.</p>
-      </main>
-    );
-  }
+type Brand = {
+  id: string;
+  slug: string;
+  brand_name: string | null;
+  website: string | null;
+  contact_email: string | null;
+  country: string | null;
+  industry: string | null;
+  slogan: string | null;
+  description: string | null;
+  gots?: boolean | null;
+  bcorp?: boolean | null;
+  fair_trade?: boolean | null;
+  oeko_tex?: boolean | null;
+  vegan?: boolean | null;
+  climate_neutral?: boolean | null;
+};
 
-  const flag = brand.country ? countryToFlag(brand.country) : '';
-
-  return (
-    <main className="container">
-      <a className="btn" href="/directory">← Back to Directory</a>
-      <h1 style={{ marginTop: 12 }}>{brand.brand_name}</h1>
-
-      <div className="row" style={{ margin: '8px 0 16px' }}>
-        {brand.industry && <span className={industryBadgeClass(brand.industry)}>{brand.industry}</span>}
-        {brand.country && <span className="badge">{flag ? `${flag} ${brand.country}` : brand.country}</span>}
-        {brand.status && <span className={`badge badge--${capitalize(brand.status)}`}>{brand.status}</span>}
-      </div>
-
-      {brand.slogan && <p style={{ fontSize: 18 }}>{brand.slogan}</p>}
-      {brand.description && <p style={{ marginTop: 8 }}>{brand.description}</p>}
-
-      <section style={{ marginTop: 16 }}>
-        <h3 style={{ marginBottom: 8 }}>Certifications</h3>
-        <div className="icon-row">
-          {brand.gots && <span className="icon icon--ok" title="GOTS">🧵</span>}
-          {brand.bcorp && <span className="icon icon--info" title="B Corp">🅱️</span>}
-          {brand.fair_trade && <span className="icon icon--ok" title="Fair Trade">🤝</span>}
-          {brand.oeko_tex && <span className="icon icon--info" title="OEKO-TEX">✅</span>}
-          {brand.vegan && <span className="icon icon--warn" title="Vegan">🌱</span>}
-          {brand.climate_neutral && <span className="icon icon--info" title="Climate neutral">🌍</span>}
-          {!brand.gots && !brand.bcorp && !brand.fair_trade && !brand.oeko_tex && !brand.vegan && !brand.climate_neutral && (
-            <span style={{ color: 'var(--muted)' }}>— no certifications listed yet —</span>
-          )}
-        </div>
-      </section>
-
-      {brand.website && (
-        <section style={{ marginTop: 16 }}>
-          <h3 style={{ marginBottom: 8 }}>Website</h3>
-          <a className="mono" href={brand.website} target="_blank" rel="noreferrer">{brand.website}</a>
-        </section>
-      )}
-    </main>
-  );
-}
-
-/* --- Helpers (server file, pure functions) --- */
+/* --- Helpers --- */
 function countryToFlag(country?: string | null) {
   if (!country) return '';
   const map: Record<string, string> = {
@@ -79,20 +43,74 @@ function countryToFlag(country?: string | null) {
   const name = country.trim();
   const iso = (map[name] || name).toUpperCase();
   if (/^[A-Z]{2}$/.test(iso)) {
-    const cps = iso.split('').map(c => 0x1F1E6 + (c.charCodeAt(0) - 65));
-    return String.fromCodePoint(...cps);
+    const codePoints = iso.split('').map(c => 0x1F1E6 + (c.charCodeAt(0) - 65));
+    return String.fromCodePoint(...codePoints);
   }
   return country;
 }
 
-function industryBadgeClass(industry?: string | null) {
-  const key = (industry || 'Other').toLowerCase();
-  if (key.includes('fashion'))     return 'badge badge--Fashion';
-  if (key.includes('material'))    return 'badge badge--Materials';
-  if (key.includes('accessor'))    return 'badge badge--Accessories';
-  if (key.includes('footwear')|| key.includes('shoes')) return 'badge badge--Footwear';
-  if (key.includes('home'))        return 'badge badge--Home';
-  return 'badge badge--Other';
-}
+export default function BrandPage() {
+  const { slug } = useParams();
+  const [brand, setBrand] = useState<Brand | null>(null);
+  const [loading, setLoading] = useState(true);
 
-function capitalize(s: string) { return s.charAt(0).toUpperCase() + s.slice(1); }
+  useEffect(() => {
+    const fetchBrand = async () => {
+      const supabase = supabaseBrowser();
+      const { data, error } = await supabase
+        .from('brands')
+        .select('*')
+        .eq('slug', slug)
+        .single();
+
+      if (!error && data) setBrand(data as Brand);
+      setLoading(false);
+    };
+    if (slug) fetchBrand();
+  }, [slug]);
+
+  if (loading) return <p className="text-muted">Loading…</p>;
+  if (!brand) return <p className="text-muted">Brand not found.</p>;
+
+  const flag = countryToFlag(brand.country);
+
+  return (
+    <div className="container" style={{ maxWidth: 720, margin: '0 auto' }}>
+      <h1 style={{ fontSize: 32, fontWeight: 700 }}>
+        {brand.brand_name}
+      </h1>
+      {brand.slogan && <h2 style={{ fontSize: 20, color: 'var(--muted)', marginBottom: 16 }}>{brand.slogan}</h2>}
+
+      <div className="meta" style={{ marginBottom: 12 }}>
+        {brand.industry && <span className="badge">{brand.industry}</span>}
+        {brand.country && <span className="badge">{flag ? `${flag} ${brand.country}` : brand.country}</span>}
+      </div>
+
+      {brand.description && <p style={{ marginBottom: 16 }}>{brand.description}</p>}
+
+      {/* Certifications */}
+      <div className="icon-row" style={{ marginBottom: 16 }}>
+        {brand.gots && <span className="icon" title="GOTS">🧵</span>}
+        {brand.bcorp && <span className="icon" title="B Corp">🅱️</span>}
+        {brand.fair_trade && <span className="icon" title="Fair Trade">🤝</span>}
+        {brand.oeko_tex && <span className="icon" title="OEKO-TEX">✅</span>}
+        {brand.vegan && <span className="icon" title="Vegan">🌱</span>}
+        {brand.climate_neutral && <span className="icon" title="Climate neutral">🌍</span>}
+      </div>
+
+      {/* Links */}
+      <div style={{ marginTop: 8 }}>
+        {brand.website && (
+          <a href={brand.website} target="_blank" rel="noreferrer" className="mono">
+            🌐 {brand.website}
+          </a>
+        )}
+        {brand.contact_email && (
+          <p style={{ marginTop: 8 }}>
+            📧 <a href={`mailto:${brand.contact_email}`} className="mono">{brand.contact_email}</a>
+          </p>
+        )}
+      </div>
+    </div>
+  );
+}
