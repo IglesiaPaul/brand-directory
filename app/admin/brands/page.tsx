@@ -1,60 +1,29 @@
 // app/admin/brands/page.tsx
-'use client';
+import { redirect } from 'next/navigation';
+import { supabaseServer } from '@/lib/supabaseServer';
+import AdminBrandsShell from './AdminBrandsShell';
+import type { Brand } from './types';
 
-import Link from 'next/link';
+export default async function AdminBrandsPage() {
+  // Auth + allowlist (mirror /admin)
+  const supabase = supabaseServer();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) redirect('/login');
 
-const dummyBrands = [
-  { id: '1', name: 'HempCo', status: 'live' },
-  { id: '2', name: 'EcoThreads', status: 'draft' },
-  { id: '3', name: 'GreenFiber', status: 'archived' },
-];
+  const ALLOWLIST = ['me@pauliglesia.com'];
+  if (ALLOWLIST.length && !ALLOWLIST.includes(user.email ?? '')) {
+    redirect('/login?error=not_allowed');
+  }
 
-export default function AdminBrandsPage() {
+  // Load brands
+  const { data: brands, error } = await supabase
+    .from('brands')
+    .select('*')
+    .order('brand_name', { ascending: true });
+
+  if (error) throw new Error(error.message);
+
   return (
-    <div className="container">
-      <h1>Brands Overview</h1>
-
-      {/* Filters placeholder */}
-      <div style={{ marginBottom: 16 }}>
-        <input
-          type="text"
-          placeholder="Search…"
-          className="input"
-          style={{ width: 240, marginRight: 12 }}
-        />
-        <select className="select">
-          <option>All statuses</option>
-          <option>Live</option>
-          <option>Draft</option>
-          <option>Archived</option>
-        </select>
-      </div>
-
-      {/* Cards list */}
-      <div style={{ display: 'grid', gap: 16, gridTemplateColumns: '1fr 1fr 1fr' }}>
-        {dummyBrands.map((b) => (
-          <div
-            key={b.id}
-            style={{
-              border: '1px solid var(--border)',
-              borderRadius: 8,
-              padding: 16,
-              background: 'var(--panel)',
-            }}
-          >
-            <h3>{b.name}</h3>
-            <p>Status: {b.status}</p>
-
-            <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
-              <Link href={`/admin/brands/${b.id}`}>
-                <button className="btn btn--primary">Edit</button>
-              </Link>
-              <button className="btn">Hide/Show</button>
-              <button className="btn btn--danger">Delete</button>
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
+    <AdminBrandsShell initialRows={(brands ?? []) as Brand[]} />
   );
 }
