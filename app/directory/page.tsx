@@ -3,9 +3,11 @@
 import { useEffect, useMemo, useState } from 'react';
 import { supabaseBrowser } from '@/lib/supabaseBrowser';
 
+type Status = 'live' | 'demo' | 'draft' | 'archived';
+
 type Brand = {
   id: string;
-  slug: string; // ✅ Ensure we fetch slug from Supabase
+  slug: string;                         // required for routing
   brand_name: string | null;
   website: string | null;
   contact_email: string | null;
@@ -13,53 +15,50 @@ type Brand = {
   industry: string | null;
   slogan: string | null;
   description: string | null;
-  status?: 'live' | 'demo' | 'draft' | 'archived' | null;
-  is_test?: boolean | null;
-
-  /* Optional certifications */
-  gots?: boolean | null;
-  bcorp?: boolean | null;
-  fair_trade?: boolean | null;
-  oeko_tex?: boolean | null;
-  vegan?: boolean | null;
-  climate_neutral?: boolean | null;
+  status: Status | null;
+  is_test: boolean | null;
+  gots: boolean | null;
+  bcorp: boolean | null;
+  fair_trade: boolean | null;
+  oeko_tex: boolean | null;
+  vegan: boolean | null;
+  climate_neutral: boolean | null;
 };
 
 /* --- Helpers --- */
 function countryToFlag(country?: string | null) {
   if (!country) return '';
   const map: Record<string, string> = {
-    "United States of America": "US",
-    "United States": "US",
-    "USA": "US",
-    "United Kingdom": "GB",
-    "UK": "GB",
-    "Great Britain": "GB",
-    "South Korea": "KR",
-    "Korea": "KR",
-    "Czech Republic": "CZ",
-    "Ivory Coast": "CI",
-    "Côte d'Ivoire": "CI",
-    "UAE": "AE",
-    "United Arab Emirates": "AE"
+    'United States of America': 'US',
+    'United States': 'US',
+    'USA': 'US',
+    'United Kingdom': 'GB',
+    'UK': 'GB',
+    'Great Britain': 'GB',
+    'South Korea': 'KR',
+    'Korea': 'KR',
+    'Czech Republic': 'CZ',
+    'Ivory Coast': 'CI',
+    "Côte d'Ivoire": 'CI',
+    'UAE': 'AE',
+    'United Arab Emirates': 'AE',
   };
   const name = country.trim();
   const iso = (map[name] || name).toUpperCase();
-
   if (/^[A-Z]{2}$/.test(iso)) {
-    const codePoints = iso.split('').map(c => 0x1F1E6 + (c.charCodeAt(0) - 65));
-    return String.fromCodePoint(...codePoints);
+    const cps = iso.split('').map((c) => 0x1f1e6 + (c.charCodeAt(0) - 65));
+    return String.fromCodePoint(...cps);
   }
   return country;
 }
 
 function industryBadgeClass(industry?: string | null) {
   const key = (industry || 'Other').toLowerCase();
-  if (key.includes('fashion'))     return 'badge badge--Fashion';
-  if (key.includes('material'))    return 'badge badge--Materials';
-  if (key.includes('accessor'))    return 'badge badge--Accessories';
-  if (key.includes('footwear')|| key.includes('shoes')) return 'badge badge--Footwear';
-  if (key.includes('home'))        return 'badge badge--Home';
+  if (key.includes('fashion')) return 'badge badge--Fashion';
+  if (key.includes('material')) return 'badge badge--Materials';
+  if (key.includes('accessor')) return 'badge badge--Accessories';
+  if (key.includes('footwear') || key.includes('shoes')) return 'badge badge--Footwear';
+  if (key.includes('home')) return 'badge badge--Home';
   return 'badge badge--Other';
 }
 
@@ -67,21 +66,57 @@ export default function PublicDirectoryPage() {
   const [rows, setRows] = useState<Brand[]>([]);
   const [loading, setLoading] = useState(true);
   const [q, setQ] = useState('');
-  const [country, setCountry] = useState('All');
-  const [industry, setIndustry] = useState('All');
-  const [open, setOpen] = useState<Record<string, boolean>>({});
+  const [country, setCountry] = useState<'All' | string>('All');
+  const [industry, setIndustry] = useState<'All' | string>('All');
+  const [open, setOpen] = useState<Record<string, boolean>>({}); // expand per-card
 
   useEffect(() => {
     const fetchLive = async () => {
       const supabase = supabaseBrowser();
       const { data, error } = await supabase
         .from('brands')
-        .select('id,slug,brand_name,website,contact_email,country,industry,slogan,description,status,is_test,gots,bcorp,fair_trade,oeko_tex,vegan,climate_neutral')
+        .select(
+          [
+            'id',
+            'slug',
+            'brand_name',
+            'website',
+            'contact_email',
+            'country',
+            'industry',
+            'slogan',
+            'description',
+            'status',
+            'is_test',
+            'gots',
+            'bcorp',
+            'fair_trade',
+            'oeko_tex',
+            'vegan',
+            'climate_neutral',
+          ].join(',')
+        )
         .eq('status', 'live')
         .eq('is_test', false)
         .order('brand_name', { ascending: true });
 
-      if (!error && data) setRows(data as Brand[]);
+      if (error) {
+        console.error(error.message);
+        setRows([]);
+      } else {
+        // Type-safe fallback defaults for nullable booleans
+        const normalized = (data ?? []).map((b) => ({
+          ...b,
+          is_test: b.is_test ?? null,
+          gots: b.gots ?? null,
+          bcorp: b.bcorp ?? null,
+          fair_trade: b.fair_trade ?? null,
+          oeko_tex: b.oeko_tex ?? null,
+          vegan: b.vegan ?? null,
+          climate_neutral: b.climate_neutral ?? null,
+        })) as Brand[];
+        setRows(normalized);
+      }
       setLoading(false);
     };
     fetchLive();
@@ -103,7 +138,9 @@ export default function PublicDirectoryPage() {
       if (country !== 'All' && r.country !== country) return false;
       if (industry !== 'All' && r.industry !== industry) return false;
       if (!query) return true;
-      const hay = `${r.brand_name ?? ''} ${r.country ?? ''} ${r.industry ?? ''} ${r.slogan ?? ''} ${r.description ?? ''}`.toLowerCase();
+      const hay = `${r.brand_name ?? ''} ${r.country ?? ''} ${r.industry ?? ''} ${r.slogan ?? ''} ${
+        r.description ?? ''
+      }`.toLowerCase();
       return hay.includes(query);
     });
   }, [rows, q, country, industry]);
@@ -112,7 +149,7 @@ export default function PublicDirectoryPage() {
     <div className="container">
       <h1 style={{ fontSize: 28, fontWeight: 700, marginBottom: 8 }}>Hemp’in Directory</h1>
       <p style={{ color: 'var(--muted)', marginTop: 0, marginBottom: 16 }}>
-        Discover hemp fashion & materials brands.
+        Discover hemp fashion &amp; materials brands.
       </p>
 
       <div className="row" style={{ marginBottom: 16 }}>
@@ -124,10 +161,18 @@ export default function PublicDirectoryPage() {
           onChange={(e) => setQ(e.target.value)}
         />
         <select className="select" value={country} onChange={(e) => setCountry(e.target.value)}>
-          {countries.map((c) => <option key={c} value={c}>{c}</option>)}
+          {countries.map((c) => (
+            <option key={c} value={c}>
+              {c}
+            </option>
+          ))}
         </select>
         <select className="select" value={industry} onChange={(e) => setIndustry(e.target.value)}>
-          {industries.map((c) => <option key={c} value={c}>{c}</option>)}
+          {industries.map((c) => (
+            <option key={c} value={c}>
+              {c}
+            </option>
+          ))}
         </select>
       </div>
 
@@ -141,6 +186,7 @@ export default function PublicDirectoryPage() {
             return (
               <article key={b.id} className="card">
                 <h3 style={{ marginBottom: 4 }}>
+                  {/* NOTE: your dynamic route is singular: app/brand/[slug]/page.tsx */}
                   <a href={`/brand/${b.slug}`} style={{ textDecoration: 'none', color: 'inherit' }}>
                     {b.brand_name}
                   </a>
@@ -153,7 +199,7 @@ export default function PublicDirectoryPage() {
 
                 {b.slogan && <p style={{ marginTop: 6 }}>{b.slogan}</p>}
 
-                <div className="toggle" onClick={() => setOpen(prev => ({ ...prev, [b.id]: !isOpen }))}>
+                <div className="toggle" onClick={() => setOpen((prev) => ({ ...prev, [b.id]: !isOpen }))}>
                   {isOpen ? 'Hide details ▲' : 'Show details ▼'}
                 </div>
 
@@ -165,7 +211,7 @@ export default function PublicDirectoryPage() {
                       {b.gots && <span className="icon icon--ok" title="GOTS">🧵</span>}
                       {b.bcorp && <span className="icon icon--info" title="B Corp">🅱️</span>}
                       {b.fair_trade && <span className="icon icon--ok" title="Fair Trade">🤝</span>}
-                      {b.oeko_tex && <span className="icon icon--info" title="OEKO-TEX">✅</span>}
+                      {b.oeko_tex && <span className="icon icon--info" title="OEKO‑TEX">✅</span>}
                       {b.vegan && <span className="icon icon--warn" title="Vegan">🌱</span>}
                       {b.climate_neutral && <span className="icon icon--info" title="Climate neutral">🌍</span>}
                     </div>
@@ -182,9 +228,7 @@ export default function PublicDirectoryPage() {
               </article>
             );
           })}
-          {filtered.length === 0 && (
-            <p style={{ color: 'var(--muted)' }}>No brands match your filters.</p>
-          )}
+          {filtered.length === 0 && <p style={{ color: 'var(--muted)' }}>No brands match your filters.</p>}
         </div>
       )}
     </div>
