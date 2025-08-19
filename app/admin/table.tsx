@@ -52,7 +52,6 @@ type EditPatch = Partial<
 >;
 
 export default function AdminTable({ initialRows }: { initialRows: Brand[] }) {
-  // initialize from initialRows (component owns its state afterwards)
   const [data, setData] = useState<Brand[]>(initialRows);
   const [filterStatus, setFilterStatus] =
     useState<'all' | NonNullable<Brand['status']>>('all');
@@ -89,7 +88,6 @@ export default function AdminTable({ initialRows }: { initialRows: Brand[] }) {
     setSavingId(row.id);
     setErrorMsg(null);
 
-    // ✅ Explicit, type‑safe clean object (no dynamic index assignment)
     const clean: EditPatch = {
       brand_name: row.brand_name?.trim() ?? null,
       website: row.website?.trim() ?? null,
@@ -220,6 +218,7 @@ export default function AdminTable({ initialRows }: { initialRows: Brand[] }) {
         <table className="table" style={{ tableLayout: 'fixed', width: '100%' }}>
           <thead>
             <tr>
+              <th style={{ width: 180 }}>Actions</th>
               <th style={{ width: 190 }}>Name</th>
               <th style={{ width: 230 }}>Website</th>
               <th style={{ width: 220 }}>Email</th>
@@ -231,12 +230,39 @@ export default function AdminTable({ initialRows }: { initialRows: Brand[] }) {
               <th style={{ width: 80 }}>Test?</th>
               <th style={{ width: 220 }}>Slogan</th>
               <th /* Description flexes */>Description</th>
-              <th style={{ width: 180 }}>Actions</th>
             </tr>
           </thead>
           <tbody>
             {filtered.map((r) => (
               <tr key={r.id}>
+                {/* Actions (now first, stacked vertically and equal width via CSS) */}
+                <td>
+                  <div className="actions">
+                    <button
+                      className="btn"
+                      onClick={() => toggleVisibility(r)}
+                      title={r.status === 'live' ? 'Hide from public' : 'Show on public'}
+                    >
+                      {r.status === 'live' ? 'Hide' : 'Show'}
+                    </button>
+
+                    <button
+                      className="btn btn--primary"
+                      disabled={savingId === r.id}
+                      onClick={() => saveRow(r)}
+                    >
+                      {savingId === r.id ? 'Saving…' : 'Save'}
+                    </button>
+
+                    <button
+                      className="btn btn--danger"
+                      onClick={() => requestDelete(r.id)}
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </td>
+
                 {/* Name */}
                 <td>
                   <input
@@ -420,7 +446,7 @@ export default function AdminTable({ initialRows }: { initialRows: Brand[] }) {
                   />
                 </td>
 
-                {/* Description (auto-wraps; no x-scroll) */}
+                {/* Description */}
                 <td style={{ whiteSpace: 'normal' }}>
                   <textarea
                     className="textarea"
@@ -431,34 +457,6 @@ export default function AdminTable({ initialRows }: { initialRows: Brand[] }) {
                     }
                     style={{ width: '100%' }}
                   />
-                </td>
-
-                {/* Actions */}
-                <td>
-                  <div className="actions" style={{ gap: 8, flexWrap: 'wrap' }}>
-                    <button
-                      className="btn"
-                      onClick={() => toggleVisibility(r)}
-                      title={r.status === 'live' ? 'Hide from public' : 'Show on public'}
-                    >
-                      {r.status === 'live' ? 'Hide' : 'Show'}
-                    </button>
-
-                    <button
-                      className="btn btn--primary"
-                      disabled={savingId === r.id}
-                      onClick={() => saveRow(r)}
-                    >
-                      {savingId === r.id ? 'Saving…' : 'Save'}
-                    </button>
-
-                    <button
-                      className="btn btn--danger"
-                      onClick={() => requestDelete(r.id)}
-                    >
-                      Delete
-                    </button>
-                  </div>
                 </td>
               </tr>
             ))}
@@ -475,14 +473,8 @@ export default function AdminTable({ initialRows }: { initialRows: Brand[] }) {
 
       {/* Delete confirmation modal (type DELETE) */}
       {confirmId && (
-        <div
-          className="modal-overlay"
-          onClick={cancelDelete}
-        >
-          <div
-            className="modal-card"
-            onClick={(e) => e.stopPropagation()}
-          >
+        <div className="modal-overlay" onClick={cancelDelete}>
+          <div className="modal-card" onClick={(e) => e.stopPropagation()}>
             <h3>Confirm deletion</h3>
             <p>
               This action is permanent. To confirm, type <b>DELETE</b> below.
