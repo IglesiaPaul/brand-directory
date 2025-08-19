@@ -14,12 +14,56 @@ type Brand = {
   description: string | null;
   status?: 'live' | 'demo' | 'draft' | 'archived' | null;
   is_test?: boolean | null;
+
+  /* Optional certifications (can be missing/null) */
+  gots?: boolean | null;
+  bcorp?: boolean | null;
+  fair_trade?: boolean | null;
+  oeko_tex?: boolean | null;
+  vegan?: boolean | null;
+  climate_neutral?: boolean | null;
 };
 
-function flag(country?: string | null) {
+/* --- Helpers --- */
+
+// Map common country names to flag emoji.
+// If your country column already stores ISO codes, adapt accordingly.
+function countryToFlag(country?: string | null) {
   if (!country) return '';
-  // very simple: just return country text; you can map to flags later
-  return country;
+  const map: Record<string, string> = {
+    "United States of America": "US",
+    "United States": "US",
+    "USA": "US",
+    "United Kingdom": "GB",
+    "UK": "GB",
+    "Great Britain": "GB",
+    "South Korea": "KR",
+    "Korea": "KR",
+    "Czech Republic": "CZ",
+    "Ivory Coast": "CI",
+    "Côte d'Ivoire": "CI",
+    "UAE": "AE",
+    "United Arab Emirates": "AE"
+  };
+  const name = country.trim();
+  const iso = (map[name] || name).toUpperCase();
+
+  // If we have a 2-letter A–Z code, render emoji flag. Else return raw text.
+  if (/^[A-Z]{2}$/.test(iso)) {
+    const codePoints = iso.split('').map(c => 0x1F1E6 + (c.charCodeAt(0) - 65));
+    return String.fromCodePoint(...codePoints);
+  }
+  return country; // fallback
+}
+
+function industryBadgeClass(industry?: string | null) {
+  const key = (industry || 'Other').toLowerCase();
+  if (key.includes('fashion'))     return 'badge badge--Fashion';
+  if (key.includes('material'))    return 'badge badge--Materials';
+  if (key.includes('accessor'))    return 'badge badge--Accessories';
+  if (key.includes('footwear')|| key.includes('shoes')) return 'badge badge--Footwear';
+  if (key.includes('home'))        return 'badge badge--Home';
+  return 'badge badge--Other';
 }
 
 export default function PublicDirectoryPage() {
@@ -28,17 +72,18 @@ export default function PublicDirectoryPage() {
   const [q, setQ] = useState('');
   const [country, setCountry] = useState('All');
   const [industry, setIndustry] = useState('All');
+  const [open, setOpen] = useState<Record<string, boolean>>({}); // expand per-card
 
   useEffect(() => {
     const fetchLive = async () => {
       const supabase = supabaseBrowser();
-      // public directory: show only live & not test
       const { data, error } = await supabase
         .from('brands')
-        .select('id,brand_name,website,contact_email,country,industry,slogan,description,status,is_test')
+        .select('id,brand_name,website,contact_email,country,industry,slogan,description,status,is_test,gots,bcorp,fair_trade,oeko_tex,vegan,climate_neutral')
         .eq('status', 'live')
         .eq('is_test', false)
         .order('brand_name', { ascending: true });
+
       if (!error && data) setRows(data as Brand[]);
       setLoading(false);
     };
@@ -93,24 +138,56 @@ export default function PublicDirectoryPage() {
         <p style={{ color: 'var(--muted)' }}>Loading…</p>
       ) : (
         <div className="grid">
-          {filtered.map((b) => (
-            <article key={b.id} className="card">
-              <h3>{b.brand_name}</h3>
-              <div className="row" style={{ gap: 8, marginBottom: 6 }}>
-                {b.industry && <span className="badge">{b.industry}</span>}
-                {b.country && <span className="badge">{flag(b.country)}</span>}
-              </div>
-              {b.slogan && <p style={{ marginTop: 6 }}>{b.slogan}</p>}
-              {b.description && <p>{b.description}</p>}
-              {b.website && (
-                <p style={{ marginTop: 8 }}>
-                  <a href={b.website} target="_blank" rel="noreferrer" className="mono">
-                    {b.website}
+          {filtered.map((b) => {
+            const isOpen = !!open[b.id];
+            const flag = countryToFlag(b.country);
+            return (
+              <article key={b.id} className="card">
+                <h3 style={{ marginBottom: 4 }}>
+                  <a href={`/brand/${b.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+                    {b.brand_name}
                   </a>
-                </p>
-              )}
-            </article>
-          ))}
+                </h3>
+
+                <div className="meta">
+                  {b.industry && <span className={industryBadgeClass(b.industry)}>{b.industry}</span>}
+                  {b.country && <span className="badge">{flag ? `${flag} ${b.country}` : b.country}</span>}
+                </div>
+
+                {b.slogan && <p style={{ marginTop: 6 }}>{b.slogan}</p>}
+
+                {/* Toggle */}
+                <div className="toggle" onClick={() => setOpen(prev => ({ ...prev, [b.id]: !isOpen }))}>
+                  {isOpen ? 'Hide details ▲' : 'Show details ▼'}
+                </div>
+
+                {isOpen && (
+                  <div className="details">
+                    {b.description && <p>{b.description}</p>}
+
+                    {/* Certifications row (shows only those that are true) */}
+                    <div className="icon-row" style={{ marginTop: 6 }}>
+                      {b.gots && <span className="icon icon--ok" title="GOTS">🧵</span>}
+                      {b.bcorp && <span className="icon icon--info" title="B Corp">🅱️</span>}
+                      {b.fair_trade && <span className="icon icon--ok" title="Fair Trade">🤝</span>}
+                      {b.oeko_tex && <span className="icon icon--info" title="OEKO‑TEX">✅</span>}
+                      {b.vegan && <span className="icon icon--warn" title="Vegan">🌱</span>}
+                      {b.climate_neutral && <span className="icon icon--info" title="Climate neutral">🌍</span>}
+                    </div>
+
+                    {/* Links */}
+                    <div style={{ marginTop: 8 }}>
+                      {b.website && (
+                        <a href={b.website} target="_blank" rel="noreferrer" className="mono">
+                          {b.website}
+                        </a>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </article>
+            );
+          })}
           {filtered.length === 0 && (
             <p style={{ color: 'var(--muted)' }}>No brands match your filters.</p>
           )}
