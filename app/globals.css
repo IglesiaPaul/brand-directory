@@ -54,11 +54,12 @@ body {
 .table thead th {
   position: sticky; top: 0; z-index: 1;
   background: #0d1117; color: #cbd5e1; text-align: left; font-weight: 600;
-  padding: 10px; border-bottom: 1px solid var(--border);
+  padding: 6px 8px; /* reduced height */
+  border-bottom: 1px solid var(--border);
 }
 .table tbody td { padding: 8px 10px; border-top: 1px solid var(--border); vertical-align: top; }
 .table tbody tr:nth-child(2n) td { background: #0e1218; }
-.actions { display: flex; gap: 8px; }
+.actions { display: flex; gap: 8px; } /* base; overridden below for admin layout */
 
 /* Badges */
 .badge {
@@ -183,11 +184,17 @@ body {
   font-size: 13px;
 }
 
-/* 4) Actions wrap nicely on smaller widths */
+/* 4) Actions: vertical stack, equal widths */
 .actions {
   display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 6px;
+}
+.actions .btn {
+  width: 100%;
+  text-align: center;
+  justify-content: center;
 }
 
 /* 5) Delete confirmation modal */
@@ -222,6 +229,6 @@ body {
 /* Small responsive nudge for very narrow screens */
 @media (max-width: 640px) {
   .container { padding: 16px; }
-  .table thead th { padding: 8px; }
+  .table thead th { padding: 6px 8px; } /* keep compact on small screens */
   .table tbody td { padding: 6px 8px; }
 }
