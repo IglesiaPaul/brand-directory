@@ -1,23 +1,23 @@
 'use client';
 
 import { useState } from 'react';
+import type { Brand } from '../types';
 
 /**
- * Lightweight client component so the page compiles.
- * It shows a few editable fields locally (no save yet).
- * We’ll wire up Supabase actions after this builds cleanly.
+ * Client-side editor (dummy for now).
+ * Accepts `initial` (Brand) so it matches page.tsx usage.
  */
-export default function EditorClient({ brand }: { brand: any }) {
+export default function EditorClient({ initial }: { initial: Brand }) {
   const [form, setForm] = useState(() => ({
-    brand_name: brand?.brand_name ?? '',
-    slug: brand?.slug ?? '',
-    country: brand?.country ?? '',
-    industry: brand?.industry ?? '',
-    status: brand?.status ?? 'draft',
-    slogan: brand?.slogan ?? '',
-    description: brand?.description ?? '',
-    website: brand?.website ?? '',
-    contact_email: brand?.contact_email ?? '',
+    brand_name: initial?.brand_name ?? '',
+    slug: initial?.slug ?? '',
+    country: initial?.country ?? '',
+    industry: initial?.industry ?? '',
+    status: (initial?.status as string) ?? 'draft',
+    slogan: initial?.slogan ?? '',
+    description: initial?.description ?? '',
+    website: initial?.website ?? '',
+    contact_email: initial?.contact_email ?? '',
   }));
 
   function set<K extends keyof typeof form>(key: K, val: string) {
