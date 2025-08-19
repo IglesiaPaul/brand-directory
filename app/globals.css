@@ -59,7 +59,9 @@ body {
 }
 .table tbody td { padding: 8px 10px; border-top: 1px solid var(--border); vertical-align: top; }
 .table tbody tr:nth-child(2n) td { background: #0e1218; }
-.actions { display: flex; gap: 8px; } /* base; overridden below for admin layout */
+
+/* Actions default */
+.actions { display: flex; gap: 8px; }
 
 /* Badges */
 .badge {
@@ -154,11 +156,11 @@ body {
 /* 1) Full-width, wrapping table (avoid horizontal scroll) */
 .table {
   width: 100%;
-  table-layout: fixed; /* distribute columns, prevent overflow */
+  table-layout: fixed;
 }
 .table td, .table th {
   word-wrap: break-word;
-  white-space: normal; /* allow wrapping for long URLs/emails/text */
+  white-space: normal;
   vertical-align: top;
 }
 
@@ -185,19 +187,30 @@ body {
 }
 
 /* 4) Actions: vertical stack, equal widths */
-.actions {
+.actions--stack {
   display: flex;
   flex-direction: column;
   align-items: stretch;
   gap: 6px;
 }
-.actions .btn {
+.actions--stack .btn {
   width: 100%;
   text-align: center;
-  justify-content: center;
 }
 
-/* 5) Delete confirmation modal */
+/* 5) Fix Description column */
+.th-desc, .td-desc {
+  width: auto;
+  min-width: 260px;
+  max-width: 480px;
+}
+.td-desc textarea {
+  min-height: 64px;
+  resize: vertical; /* admin can resize */
+  width: 100%;
+}
+
+/* 6) Delete confirmation modal */
 .modal-overlay {
   position: fixed;
   inset: 0;
@@ -229,6 +242,6 @@ body {
 /* Small responsive nudge for very narrow screens */
 @media (max-width: 640px) {
   .container { padding: 16px; }
-  .table thead th { padding: 6px 8px; } /* keep compact on small screens */
+  .table thead th { padding: 6px 8px; }
   .table tbody td { padding: 6px 8px; }
 }
