@@ -52,7 +52,7 @@ type EditPatch = Partial<
 >;
 
 export default function AdminTable({ initialRows }: { initialRows: Brand[] }) {
-  // ✅ initialize from initialRows (component owns its state afterwards)
+  // initialize from initialRows (component owns its state afterwards)
   const [data, setData] = useState<Brand[]>(initialRows);
   const [filterStatus, setFilterStatus] =
     useState<'all' | NonNullable<Brand['status']>>('all');
@@ -89,29 +89,25 @@ export default function AdminTable({ initialRows }: { initialRows: Brand[] }) {
     setSavingId(row.id);
     setErrorMsg(null);
 
-    // Clean & trim strings; send only editable columns
-    const clean: EditPatch = {};
-    ([
-      'brand_name',
-      'website',
-      'contact_email',
-      'country',
-      'industry',
-      'phone',
-      'slogan',
-      'description',
-      'is_test',
-      'status',
-      'gots',
-      'bcorp',
-      'fair_trade',
-      'oeko_tex',
-      'vegan',
-      'climate_neutral',
-    ] as const).forEach((k) => {
-      const v = row[k];
-      clean[k] = typeof v === 'string' ? v.trim() : v ?? null;
-    });
+    // ✅ Explicit, type‑safe clean object (no dynamic index assignment)
+    const clean: EditPatch = {
+      brand_name: row.brand_name?.trim() ?? null,
+      website: row.website?.trim() ?? null,
+      contact_email: row.contact_email?.trim() ?? null,
+      country: row.country?.trim() ?? null,
+      industry: row.industry?.trim() ?? null,
+      phone: row.phone?.trim() ?? null,
+      slogan: row.slogan?.trim() ?? null,
+      description: row.description?.trim() ?? null,
+      is_test: row.is_test ?? null,
+      status: row.status ?? null,
+      gots: row.gots ?? null,
+      bcorp: row.bcorp ?? null,
+      fair_trade: row.fair_trade ?? null,
+      oeko_tex: row.oeko_tex ?? null,
+      vegan: row.vegan ?? null,
+      climate_neutral: row.climate_neutral ?? null,
+    };
 
     const { error } = await supabase.from('brands').update(clean).eq('id', row.id);
     setSavingId(null);
@@ -480,24 +476,15 @@ export default function AdminTable({ initialRows }: { initialRows: Brand[] }) {
       {/* Delete confirmation modal (type DELETE) */}
       {confirmId && (
         <div
-          style={{
-            position: 'fixed',
-            inset: 0,
-            background: 'rgba(0,0,0,0.6)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 50,
-          }}
+          className="modal-overlay"
           onClick={cancelDelete}
         >
           <div
-            className="card"
-            style={{ width: 480, maxWidth: '90%', padding: 16 }}
+            className="modal-card"
             onClick={(e) => e.stopPropagation()}
           >
-            <h3 style={{ marginTop: 0, marginBottom: 8 }}>Confirm deletion</h3>
-            <p className="muted" style={{ marginTop: 0 }}>
+            <h3>Confirm deletion</h3>
+            <p>
               This action is permanent. To confirm, type <b>DELETE</b> below.
             </p>
             <input
