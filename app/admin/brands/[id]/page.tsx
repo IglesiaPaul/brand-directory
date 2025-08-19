@@ -1,69 +1,69 @@
 // app/admin/brands/[id]/page.tsx
-'use client';
+import { redirect } from 'next/navigation';
+import Link from 'next/link';
+import { supabaseServer } from '@/lib/supabaseServer';
+import type { Brand } from '../types';
 
-import { useParams } from 'next/navigation';
+export default async function AdminBrandEditPage({
+  params,
+}: {
+  params: { id: string };
+}) {
+  // 1) Auth + allowlist (same checks as /admin and /admin/brands)
+  const supabase = supabaseServer();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) redirect('/login');
 
-export default function AdminBrandEditPage() {
-  const { id } = useParams();
+  const ALLOWLIST = ['me@pauliglesia.com'];
+  if (ALLOWLIST.length && !ALLOWLIST.includes(user.email ?? '')) {
+    redirect('/login?error=not_allowed');
+  }
 
+  // 2) Load this brand
+  const { data: brand, error } = await supabase
+    .from('brands')
+    .select('*')
+    .eq('id', params.id)
+    .single<Brand>();
+
+  if (error || !brand) {
+    return (
+      <div className="container">
+        <h1>Brand not found</h1>
+        <p style={{ marginTop: 8 }}>
+          <Link href="/admin/brands" className="btn">← Back to brands</Link>
+        </p>
+      </div>
+    );
+  }
+
+  // 3) Dummy UI for now (we’ll build the real editor next)
   return (
     <div className="container">
-      <h1>Edit Brand #{id}</h1>
+      <p style={{ marginBottom: 12 }}>
+        <Link href="/admin/brands" className="btn">← Back</Link>
+      </p>
 
-      <div style={{ display: 'flex', gap: 24 }}>
-        {/* Left column: main info */}
-        <div style={{ flex: 2 }}>
-          <label className="label">Brand Name</label>
-          <input className="input" placeholder="Name" />
+      <h1 style={{ marginTop: 0 }}>
+        Edit: {brand.brand_name || 'Untitled brand'}
+      </h1>
 
-          <label className="label">Website</label>
-          <input className="input" placeholder="https://…" />
-
-          <label className="label">Email</label>
-          <input className="input" placeholder="email@example.com" />
-
-          <label className="label">Slogan</label>
-          <input className="input" placeholder="Short tagline…" />
-
-          <label className="label">Description</label>
-          <textarea className="textarea" rows={6} placeholder="Full description…" />
+      <div style={{
+        border: '1px solid var(--border)',
+        borderRadius: 12,
+        background: 'var(--panel)',
+        padding: 16,
+        marginTop: 12
+      }}>
+        <p style={{ color: 'var(--muted)' }}>
+          This is a placeholder. We’ll add the full editable form (name, slug,
+          country, industry, certifications, visibility, etc.) in this page next.
+        </p>
+        <div style={{ fontSize: 13, marginTop: 6 }}>
+          <div><b>ID:</b> <code className="mono">{brand.id}</code></div>
+          {brand.slug ? <div><b>Slug:</b> <code className="mono">{brand.slug}</code></div> : null}
+          {brand.status ? <div><b>Status:</b> {brand.status}</div> : null}
         </div>
-
-        {/* Right column: status, certifications */}
-        <div style={{ flex: 1 }}>
-          <label className="label">Status</label>
-          <select className="select">
-            <option value="live">Live</option>
-            <option value="draft">Draft</option>
-            <option value="archived">Archived</option>
-          </select>
-
-          <label className="label" style={{ marginTop: 16 }}>
-            Test Row?
-          </label>
-          <input type="checkbox" />
-
-          <h3 style={{ marginTop: 20 }}>Certifications</h3>
-          <label><input type="checkbox" /> GOTS</label><br />
-          <label><input type="checkbox" /> B-Corp</label><br />
-          <label><input type="checkbox" /> Fair Trade</label><br />
-          <label><input type="checkbox" /> OEKO-TEX</label><br />
-          <label><input type="checkbox" /> Vegan</label><br />
-          <label><input type="checkbox" /> Climate Neutral</label>
-        </div>
-      </div>
-
-      {/* Save/Cancel bar */}
-      <div
-        style={{
-          marginTop: 24,
-          display: 'flex',
-          justifyContent: 'flex-end',
-          gap: 12,
-        }}
-      >
-        <button className="btn">Cancel</button>
-        <button className="btn btn--primary">Save</button>
       </div>
     </div>
   );
