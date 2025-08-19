@@ -5,6 +5,7 @@ import { supabaseBrowser } from '@/lib/supabaseBrowser';
 
 type Brand = {
   id: string;
+  slug: string; // ✅ Ensure we fetch slug from Supabase
   brand_name: string | null;
   website: string | null;
   contact_email: string | null;
@@ -79,7 +80,7 @@ export default function PublicDirectoryPage() {
       const supabase = supabaseBrowser();
       const { data, error } = await supabase
         .from('brands')
-        .select('id,brand_name,website,contact_email,country,industry,slogan,description,status,is_test,gots,bcorp,fair_trade,oeko_tex,vegan,climate_neutral')
+        .select('id,slug,brand_name,website,contact_email,country,industry,slogan,description,status,is_test,gots,bcorp,fair_trade,oeko_tex,vegan,climate_neutral')
         .eq('status', 'live')
         .eq('is_test', false)
         .order('brand_name', { ascending: true });
@@ -144,7 +145,7 @@ export default function PublicDirectoryPage() {
             return (
               <article key={b.id} className="card">
                 <h3 style={{ marginBottom: 4 }}>
-                  <a href={`/brand/${b.slug}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+                  <a href={`/brands/${b.slug}`} style={{ textDecoration: 'none', color: 'inherit' }}>
                     {b.brand_name}
                   </a>
                 </h3>
@@ -170,7 +171,7 @@ export default function PublicDirectoryPage() {
                       {b.gots && <span className="icon icon--ok" title="GOTS">🧵</span>}
                       {b.bcorp && <span className="icon icon--info" title="B Corp">🅱️</span>}
                       {b.fair_trade && <span className="icon icon--ok" title="Fair Trade">🤝</span>}
-                      {b.oeko_tex && <span className="icon icon--info" title="OEKO‑TEX">✅</span>}
+                      {b.oeko_tex && <span className="icon icon--info" title="OEKO-TEX">✅</span>}
                       {b.vegan && <span className="icon icon--warn" title="Vegan">🌱</span>}
                       {b.climate_neutral && <span className="icon icon--info" title="Climate neutral">🌍</span>}
                     </div>
