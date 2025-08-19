@@ -16,7 +16,7 @@ type Brand = {
   status?: 'live' | 'demo' | 'draft' | 'archived' | null;
   is_test?: boolean | null;
 
-  /* Optional certifications (can be missing/null) */
+  /* Optional certifications */
   gots?: boolean | null;
   bcorp?: boolean | null;
   fair_trade?: boolean | null;
@@ -26,9 +26,6 @@ type Brand = {
 };
 
 /* --- Helpers --- */
-
-// Map common country names to flag emoji.
-// If your country column already stores ISO codes, adapt accordingly.
 function countryToFlag(country?: string | null) {
   if (!country) return '';
   const map: Record<string, string> = {
@@ -49,12 +46,11 @@ function countryToFlag(country?: string | null) {
   const name = country.trim();
   const iso = (map[name] || name).toUpperCase();
 
-  // If we have a 2-letter A–Z code, render emoji flag. Else return raw text.
   if (/^[A-Z]{2}$/.test(iso)) {
     const codePoints = iso.split('').map(c => 0x1F1E6 + (c.charCodeAt(0) - 65));
     return String.fromCodePoint(...codePoints);
   }
-  return country; // fallback
+  return country;
 }
 
 function industryBadgeClass(industry?: string | null) {
@@ -73,7 +69,7 @@ export default function PublicDirectoryPage() {
   const [q, setQ] = useState('');
   const [country, setCountry] = useState('All');
   const [industry, setIndustry] = useState('All');
-  const [open, setOpen] = useState<Record<string, boolean>>({}); // expand per-card
+  const [open, setOpen] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     const fetchLive = async () => {
@@ -145,7 +141,7 @@ export default function PublicDirectoryPage() {
             return (
               <article key={b.id} className="card">
                 <h3 style={{ marginBottom: 4 }}>
-                  <a href={`/brands/${b.slug}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+                  <a href={`/brand/${b.slug}`} style={{ textDecoration: 'none', color: 'inherit' }}>
                     {b.brand_name}
                   </a>
                 </h3>
@@ -157,7 +153,6 @@ export default function PublicDirectoryPage() {
 
                 {b.slogan && <p style={{ marginTop: 6 }}>{b.slogan}</p>}
 
-                {/* Toggle */}
                 <div className="toggle" onClick={() => setOpen(prev => ({ ...prev, [b.id]: !isOpen }))}>
                   {isOpen ? 'Hide details ▲' : 'Show details ▼'}
                 </div>
@@ -166,7 +161,6 @@ export default function PublicDirectoryPage() {
                   <div className="details">
                     {b.description && <p>{b.description}</p>}
 
-                    {/* Certifications row (shows only those that are true) */}
                     <div className="icon-row" style={{ marginTop: 6 }}>
                       {b.gots && <span className="icon icon--ok" title="GOTS">🧵</span>}
                       {b.bcorp && <span className="icon icon--info" title="B Corp">🅱️</span>}
@@ -176,7 +170,6 @@ export default function PublicDirectoryPage() {
                       {b.climate_neutral && <span className="icon icon--info" title="Climate neutral">🌍</span>}
                     </div>
 
-                    {/* Links */}
                     <div style={{ marginTop: 8 }}>
                       {b.website && (
                         <a href={b.website} target="_blank" rel="noreferrer" className="mono">
