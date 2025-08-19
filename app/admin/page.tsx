@@ -5,24 +5,29 @@ import { redirect } from 'next/navigation';
 import { supabaseServer } from '@/lib/supabaseServer';
 import AdminTable from './table';
 
+type Status = 'live' | 'demo' | 'draft' | 'archived' | null;
+
 type Brand = {
   id: string;
-  slug: string;
+  slug?: string | null;
   brand_name: string | null;
   website: string | null;
   contact_email: string | null;
   country: string | null;
   industry: string | null;
+  phone: string | null;
   slogan: string | null;
   description: string | null;
-  status: 'live' | 'demo' | 'draft' | 'archived' | null;
-  is_test: boolean | null;
-  gots: boolean | null;
-  bcorp: boolean | null;
-  fair_trade: boolean | null;
-  oeko_tex: boolean | null;
-  vegan: boolean | null;
-  climate_neutral: boolean | null;
+  is_test?: boolean | null;
+  status?: Status;
+  created_at?: string | null;
+
+  gots?: boolean | null;
+  bcorp?: boolean | null;
+  fair_trade?: boolean | null;
+  oeko_tex?: boolean | null;
+  vegan?: boolean | null;
+  climate_neutral?: boolean | null;
 };
 
 export default async function AdminPage() {
@@ -33,22 +38,23 @@ export default async function AdminPage() {
   } = await supabase.auth.getUser();
   if (!user) redirect('/login');
 
-  // 2) Allowlist
+  // 2) Allowlist (YOUR email)
   const ALLOWLIST = ['me@pauliglesia.com'];
   if (ALLOWLIST.length && !ALLOWLIST.includes(user.email ?? '')) {
     redirect('/login?error=not_allowed');
   }
 
-  // 3) Load initial data (SSR)
+  // 3) Load data (SSR)
   const { data, error } = await supabase
     .from('brands')
     .select(
-      'id,slug,brand_name,website,contact_email,country,industry,slogan,description,status,is_test,gots,bcorp,fair_trade,oeko_tex,vegan,climate_neutral'
+      'id,slug,brand_name,website,contact_email,country,industry,phone,slogan,description,status,is_test,created_at,gots,bcorp,fair_trade,oeko_tex,vegan,climate_neutral'
     )
     .order('brand_name', { ascending: true });
 
   if (error) throw new Error(error.message);
 
+  // Normalize nullable booleans to keep client code simple
   const initialRows: Brand[] = (data ?? []).map((b) => ({
     ...b,
     is_test: b.is_test ?? null,
@@ -68,6 +74,7 @@ export default async function AdminPage() {
       <p style={{ color: 'var(--muted)', marginTop: 0, marginBottom: 16 }}>
         Edit brand details, toggle public visibility, and manage certifications.
       </p>
+      {/* ✅ pass initialRows (not rows) */}
       <AdminTable initialRows={initialRows} />
     </main>
   );
