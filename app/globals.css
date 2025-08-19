@@ -115,7 +115,7 @@ body {
 .icon--warn  { border-color:#f59e0b; }
 .icon--info  { border-color:#3b82f6; }
 
-/* -------- Auth layout (NEW) -------- */
+/* -------- Auth layout -------- */
 .auth-wrap {
   min-height: 100vh;
   display: flex;
@@ -145,3 +145,83 @@ body {
 .auth-form { display: flex; flex-direction: column; gap: 10px; margin-top: 14px; }
 .auth-btn { width: 100%; }
 .label { font-size: 13px; text-align: left; color: var(--muted); }
+
+/* ===================================================================== */
+/* =====================  ADMIN UX ENHANCEMENTS (NEW)  ================= */
+/* ===================================================================== */
+
+/* 1) Full-width, wrapping table (avoid horizontal scroll) */
+.table {
+  width: 100%;
+  table-layout: fixed; /* distribute columns, prevent overflow */
+}
+.table td, .table th {
+  word-wrap: break-word;
+  white-space: normal; /* allow wrapping for long URLs/emails/text */
+  vertical-align: top;
+}
+
+/* 2) Form controls inside table cells should stretch */
+.table td .input,
+.table td .select,
+.table td .textarea {
+  width: 100%;
+  max-width: 100%;
+}
+
+/* 3) Compact certifications grid (two columns) */
+.cert-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px 10px;
+  align-items: center;
+}
+.cert-grid label {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  font-size: 13px;
+}
+
+/* 4) Actions wrap nicely on smaller widths */
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+/* 5) Delete confirmation modal */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+.modal-card {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px;
+  max-width: 480px;
+  width: 90%;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+}
+.modal-card h3 {
+  margin: 0 0 6px;
+  font-size: 18px;
+}
+.modal-card p {
+  margin: 0 0 12px;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+/* Small responsive nudge for very narrow screens */
+@media (max-width: 640px) {
+  .container { padding: 16px; }
+  .table thead th { padding: 8px; }
+  .table tbody td { padding: 6px 8px; }
+}
