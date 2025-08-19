@@ -51,8 +51,9 @@ type EditPatch = Partial<
   >
 >;
 
-export default function AdminTable({ rows }: { rows: Brand[] }) {
-  const [data, setData] = useState<Brand[]>(rows);
+export default function AdminTable({ initialRows }: { initialRows: Brand[] }) {
+  // ✅ initialize from initialRows (component owns its state afterwards)
+  const [data, setData] = useState<Brand[]>(initialRows);
   const [filterStatus, setFilterStatus] =
     useState<'all' | NonNullable<Brand['status']>>('all');
   const [showTests, setShowTests] = useState(true);
@@ -88,7 +89,7 @@ export default function AdminTable({ rows }: { rows: Brand[] }) {
     setSavingId(row.id);
     setErrorMsg(null);
 
-    // Clean & trim strings, and only send editable columns
+    // Clean & trim strings; send only editable columns
     const clean: EditPatch = {};
     ([
       'brand_name',
@@ -218,12 +219,9 @@ export default function AdminTable({ rows }: { rows: Brand[] }) {
         <div style={{ color: 'var(--danger)', marginBottom: 10 }}>{errorMsg}</div>
       )}
 
-      {/* Responsive, full-width table (no sideways scroll unless absolutely needed) */}
+      {/* Responsive, full-width table */}
       <div className="table-wrap" style={{ width: '100%' }}>
-        <table
-          className="table"
-          style={{ tableLayout: 'fixed', width: '100%' }}
-        >
+        <table className="table" style={{ tableLayout: 'fixed', width: '100%' }}>
           <thead>
             <tr>
               <th style={{ width: 190 }}>Name</th>
@@ -479,7 +477,7 @@ export default function AdminTable({ rows }: { rows: Brand[] }) {
         </table>
       </div>
 
-      {/* Delete confirmation modal */}
+      {/* Delete confirmation modal (type DELETE) */}
       {confirmId && (
         <div
           style={{
