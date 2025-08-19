@@ -16,6 +16,14 @@ type Brand = {
   is_test?: boolean | null;
   status?: 'live' | 'demo' | 'draft' | 'archived' | null;
   created_at?: string | null;
+
+  // NEW: certifications
+  gots?: boolean | null;
+  bcorp?: boolean | null;
+  fair_trade?: boolean | null;
+  oeko_tex?: boolean | null;
+  vegan?: boolean | null;
+  climate_neutral?: boolean | null;
 };
 
 export default function AdminTable({ rows }: { rows: Brand[] }) {
@@ -124,6 +132,7 @@ export default function AdminTable({ rows }: { rows: Brand[] }) {
               <th>Country</th>
               <th>Industry</th>
               <th>Phone</th>
+              <th>Certifications</th> {/* NEW */}
               <th>Status</th>
               <th>Test?</th>
               <th style={{ minWidth: 220 }}>Slogan</th>
@@ -140,6 +149,37 @@ export default function AdminTable({ rows }: { rows: Brand[] }) {
                 <td><input className="input" value={r.country ?? ''} onChange={(e) => update(r.id, 'country', e.target.value)} /></td>
                 <td><input className="input" value={r.industry ?? ''} onChange={(e) => update(r.id, 'industry', e.target.value)} /></td>
                 <td><input className="input" value={r.phone ?? ''} onChange={(e) => update(r.id, 'phone', e.target.value)} /></td>
+
+                {/* NEW: Certifications block */}
+                <td>
+                  <div className="row" style={{ gap: 10 }}>
+                    <label className="row" title="GOTS">
+                      <input type="checkbox" checked={!!r.gots} onChange={(e) => update(r.id, 'gots', e.target.checked)} />
+                      <span>GOTS</span>
+                    </label>
+                    <label className="row" title="B‑Corp">
+                      <input type="checkbox" checked={!!r.bcorp} onChange={(e) => update(r.id, 'bcorp', e.target.checked)} />
+                      <span>B‑Corp</span>
+                    </label>
+                    <label className="row" title="Fair Trade">
+                      <input type="checkbox" checked={!!r.fair_trade} onChange={(e) => update(r.id, 'fair_trade', e.target.checked)} />
+                      <span>Fair</span>
+                    </label>
+                    <label className="row" title="OEKO‑TEX">
+                      <input type="checkbox" checked={!!r.oeko_tex} onChange={(e) => update(r.id, 'oeko_tex', e.target.checked)} />
+                      <span>OEKO‑TEX</span>
+                    </label>
+                    <label className="row" title="Vegan">
+                      <input type="checkbox" checked={!!r.vegan} onChange={(e) => update(r.id, 'vegan', e.target.checked)} />
+                      <span>Vegan</span>
+                    </label>
+                    <label className="row" title="Climate neutral">
+                      <input type="checkbox" checked={!!r.climate_neutral} onChange={(e) => update(r.id, 'climate_neutral', e.target.checked)} />
+                      <span>Climate</span>
+                    </label>
+                  </div>
+                </td>
+
                 <td>
                   <select className="select" value={r.status ?? 'draft'} onChange={(e) => update(r.id, 'status', e.target.value as any)}>
                     <option value="live">live</option>
@@ -166,7 +206,7 @@ export default function AdminTable({ rows }: { rows: Brand[] }) {
               </tr>
             ))}
             {filtered.length === 0 && (
-              <tr><td colSpan={11} style={{ padding: 16, color: 'var(--muted)' }}>No rows match the current filters.</td></tr>
+              <tr><td colSpan={12} style={{ padding: 16, color: 'var(--muted)' }}>No rows match the current filters.</td></tr>
             )}
           </tbody>
         </table>
