@@ -218,7 +218,7 @@ export default function AdminTable({ initialRows }: { initialRows: Brand[] }) {
         <table className="table" style={{ tableLayout: 'fixed', width: '100%' }}>
           <thead>
             <tr>
-              <th style={{ width: 180 }}>Actions</th>
+              <th className="th-actions" style={{ width: 180 }}>Actions</th>
               <th style={{ width: 190 }}>Name</th>
               <th style={{ width: 230 }}>Website</th>
               <th style={{ width: 220 }}>Email</th>
@@ -229,15 +229,15 @@ export default function AdminTable({ initialRows }: { initialRows: Brand[] }) {
               <th style={{ width: 110 }}>Status</th>
               <th style={{ width: 80 }}>Test?</th>
               <th style={{ width: 220 }}>Slogan</th>
-              <th /* Description flexes */>Description</th>
+              <th className="th-desc">Description</th>
             </tr>
           </thead>
           <tbody>
             {filtered.map((r) => (
               <tr key={r.id}>
-                {/* Actions (now first, stacked vertically and equal width via CSS) */}
+                {/* Actions stacked vertically */}
                 <td>
-                  <div className="actions">
+                  <div className="actions actions--stack">
                     <button
                       className="btn"
                       onClick={() => toggleVisibility(r)}
@@ -245,7 +245,6 @@ export default function AdminTable({ initialRows }: { initialRows: Brand[] }) {
                     >
                       {r.status === 'live' ? 'Hide' : 'Show'}
                     </button>
-
                     <button
                       className="btn btn--primary"
                       disabled={savingId === r.id}
@@ -253,7 +252,6 @@ export default function AdminTable({ initialRows }: { initialRows: Brand[] }) {
                     >
                       {savingId === r.id ? 'Saving…' : 'Save'}
                     </button>
-
                     <button
                       className="btn btn--danger"
                       onClick={() => requestDelete(r.id)}
@@ -336,7 +334,7 @@ export default function AdminTable({ initialRows }: { initialRows: Brand[] }) {
                   />
                 </td>
 
-                {/* Certifications — compact 2‑column grid */}
+                {/* Certifications */}
                 <td style={{ verticalAlign: 'top' }}>
                   <div
                     style={{
@@ -345,7 +343,7 @@ export default function AdminTable({ initialRows }: { initialRows: Brand[] }) {
                       gap: '6px 10px',
                     }}
                   >
-                    <label className="row" title="GOTS" style={{ gap: 6 }}>
+                    <label className="row" style={{ gap: 6 }}>
                       <input
                         type="checkbox"
                         checked={!!r.gots}
@@ -355,7 +353,7 @@ export default function AdminTable({ initialRows }: { initialRows: Brand[] }) {
                       />
                       <span>GOTS</span>
                     </label>
-                    <label className="row" title="B‑Corp" style={{ gap: 6 }}>
+                    <label className="row" style={{ gap: 6 }}>
                       <input
                         type="checkbox"
                         checked={!!r.bcorp}
@@ -363,9 +361,9 @@ export default function AdminTable({ initialRows }: { initialRows: Brand[] }) {
                           updateLocal(r.id, { bcorp: e.target.checked })
                         }
                       />
-                      <span>B‑Corp</span>
+                      <span>B-Corp</span>
                     </label>
-                    <label className="row" title="Fair Trade" style={{ gap: 6 }}>
+                    <label className="row" style={{ gap: 6 }}>
                       <input
                         type="checkbox"
                         checked={!!r.fair_trade}
@@ -375,7 +373,7 @@ export default function AdminTable({ initialRows }: { initialRows: Brand[] }) {
                       />
                       <span>Fair</span>
                     </label>
-                    <label className="row" title="OEKO‑TEX" style={{ gap: 6 }}>
+                    <label className="row" style={{ gap: 6 }}>
                       <input
                         type="checkbox"
                         checked={!!r.oeko_tex}
@@ -383,9 +381,9 @@ export default function AdminTable({ initialRows }: { initialRows: Brand[] }) {
                           updateLocal(r.id, { oeko_tex: e.target.checked })
                         }
                       />
-                      <span>OEKO‑TEX</span>
+                      <span>OEKO-TEX</span>
                     </label>
-                    <label className="row" title="Vegan" style={{ gap: 6 }}>
+                    <label className="row" style={{ gap: 6 }}>
                       <input
                         type="checkbox"
                         checked={!!r.vegan}
@@ -395,7 +393,7 @@ export default function AdminTable({ initialRows }: { initialRows: Brand[] }) {
                       />
                       <span>Vegan</span>
                     </label>
-                    <label className="row" title="Climate neutral" style={{ gap: 6 }}>
+                    <label className="row" style={{ gap: 6 }}>
                       <input
                         type="checkbox"
                         checked={!!r.climate_neutral}
@@ -447,7 +445,7 @@ export default function AdminTable({ initialRows }: { initialRows: Brand[] }) {
                 </td>
 
                 {/* Description */}
-                <td style={{ whiteSpace: 'normal' }}>
+                <td className="td-desc">
                   <textarea
                     className="textarea"
                     rows={3}
@@ -455,7 +453,6 @@ export default function AdminTable({ initialRows }: { initialRows: Brand[] }) {
                     onChange={(e) =>
                       updateLocal(r.id, { description: e.target.value })
                     }
-                    style={{ width: '100%' }}
                   />
                 </td>
               </tr>
@@ -471,7 +468,7 @@ export default function AdminTable({ initialRows }: { initialRows: Brand[] }) {
         </table>
       </div>
 
-      {/* Delete confirmation modal (type DELETE) */}
+      {/* Delete confirmation modal */}
       {confirmId && (
         <div className="modal-overlay" onClick={cancelDelete}>
           <div className="modal-card" onClick={(e) => e.stopPropagation()}>
@@ -494,7 +491,6 @@ export default function AdminTable({ initialRows }: { initialRows: Brand[] }) {
                 className="btn btn--danger right"
                 onClick={confirmDelete}
                 disabled={confirmText !== 'DELETE'}
-                title={confirmText !== 'DELETE' ? 'Type DELETE exactly' : ''}
               >
                 Permanently delete
               </button>
